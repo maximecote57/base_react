@@ -1,18 +1,15 @@
 console.log(' --- App Started --- ');
 
-console.log(' --- Importing Node Dependencies --- ');
 import React from "react";
 import ReactDOM from "react-dom";
+import { BrowserRouter } from 'react-router-dom'
 
-console.log(' --- Importing Global Styles --- ');
-import "./global/global.scss";
+import "./global_styles/global_styles.scss";
 
-console.log(' --- Importing Components --- ');
-import Navbar from "./components/Navbar";
+import App from "./App";
 
 ReactDOM.render(
-    <div>
-        <Navbar/>
-    </div>,
-    document.querySelector("#app")
-);
+    <BrowserRouter>
+        <App />
+    </BrowserRouter>
+    , document.getElementById('app'));

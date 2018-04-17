@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { Link, Route, Switch } from 'react-router-dom';
 import './Navbar.scss';
 
 class Navbar extends Component {
@@ -11,13 +12,10 @@ class Navbar extends Component {
                 <div className="navbar__section navbar__section--right">
                     <ul className="navbar__list">
                         <li className="navbar__list-item">
-                            <a className="navbar__link" href="javascript:void(0)">Home</a>
+                            <Link className="navbar__link" to="/">Home</Link>
                         </li>
                         <li className="navbar__list-item">
-                            <a className="navbar__link" href="javascript:void(0)">About</a>
-                        </li>
-                        <li className="navbar__list-item">
-                            <a className="navbar__link" href="javascript:void(0)">Login</a>
+                            <Link className="navbar__link" to="/Login">Login</Link>
                         </li>
                     </ul>
                 </div>
