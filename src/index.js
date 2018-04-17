@@ -1,13 +1,18 @@
 console.log(' --- App Started --- ');
 
-import React from 'react';
-import ReactDOM from 'react-dom';
+console.log(' --- Importing Node Dependencies --- ');
+import React from "react";
+import ReactDOM from "react-dom";
 
-const title = 'My Minimal React Webpack Babelall';
+console.log(' --- Importing Global Styles --- ');
+import "./global/global.scss";
+
+console.log(' --- Importing Components --- ');
+import Navbar from "./components/Navbar";
 
 ReactDOM.render(
-<div>{title}</div>,
-    document.getElementById('app')
+    <div>
+        <Navbar/>
+    </div>,
+    document.querySelector("#app")
 );
-
-module.hot.accept();

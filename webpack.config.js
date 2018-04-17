@@ -1,16 +1,26 @@
 const webpack = require('webpack');
+const path = require('path');
 
 module.exports = {
     entry: [
         'react-hot-loader/patch',
-        './src/index.js'
+        path.join(__dirname, 'src', 'index.js')
     ],
     module: {
         rules: [
             {
+            enforce: 'pre',
+            test: /\.scss$/,
+            loader: 'import-glob-loader',
+            },
+            {
                 test: /\.(js|jsx)$/,
                 exclude: /node_modules/,
                 use: ['babel-loader']
+            },
+            {
+                test: /\.scss$/,
+                use: ['style-loader', 'css-loader', 'sass-loader']
             }
         ]
     },
