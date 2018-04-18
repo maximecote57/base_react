@@ -1,16 +1,16 @@
 import React, { Component } from 'react';
 import { Route } from 'react-router-dom';
 import Navbar from "./components/Navbar"
-import Home from "./views/Home"
-import Login from "./views/Login"
+import HomePage from "./components/pages/HomePage"
+import LoginPage from "./components/pages/LoginPage"
 
 class App extends React.Component {
     render() {
         return (
             <div>
                 <Navbar/>
-                <Route path="/" component={Home} exact={true}/>
-                <Route path="/login" component={Login}/>
+                <Route path="/" component={HomePage} exact={true}/>
+                <Route path="/login" component={LoginPage}/>
             </div>
         )
     }
