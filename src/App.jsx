@@ -1,16 +1,15 @@
 import React, { Component } from 'react';
 import { Route } from 'react-router-dom';
-import Navbar from "./components/Navbar"
-import HomePage from "./components/pages/HomePage"
-import LoginPage from "./components/pages/LoginPage"
+
+import Simulator from './components/pages/Simulator';
+
+import "./global_styles/global_styles.scss";
 
 class App extends React.Component {
     render() {
         return (
             <div>
-                <Navbar/>
-                <Route path="/" component={HomePage} exact={true}/>
-                <Route path="/login" component={LoginPage}/>
+                <Route path="/" component={Simulator} exact/>
             </div>
         )
     }

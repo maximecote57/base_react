@@ -9,9 +9,9 @@ module.exports = {
     module: {
         rules: [
             {
-            enforce: 'pre',
-            test: /\.scss$/,
-            loader: 'import-glob-loader',
+                enforce: 'pre',
+                test: /\.scss$/,
+                loader: 'import-glob-loader',
             },
             {
                 test: /\.(js|jsx)$/,
@@ -21,6 +21,16 @@ module.exports = {
             {
                 test: /\.scss$/,
                 use: ['style-loader', 'css-loader', 'sass-loader']
+            },
+            {
+                test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+                use: [{
+                    loader: 'file-loader',
+                    options: {
+                        name: '[name].[ext]',
+                        outputPath: 'fonts/'
+                    }
+                }]
             }
         ]
     },
@@ -37,10 +47,6 @@ module.exports = {
     ],
     devServer: {
         contentBase: './dist',
-        hot: true,
-        historyApiFallback: true,
-        proxy: {
-            '/api/*': 'http://localhost:8081'
-        }
+        hot: true
     }
 };

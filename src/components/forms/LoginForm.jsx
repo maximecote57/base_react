@@ -1,7 +1,5 @@
 import React from "react";
 import Validator from 'validator';
-import InlineError from "../messages/InlineError"
-import PropTypes from 'prop-types';
 
 class LoginForm extends React.Component {
 
@@ -54,21 +52,15 @@ class LoginForm extends React.Component {
                 <div className="form__field">
                     <label htmlFor="email">Email</label>
                     <input type="email" id="email" name="email" placeholder="example@example.com" value={data.email} onChange={this.onChange}/>
-                    {errors.email && <InlineError text={errors.email} />}
                 </div>
                 <div className="form__field">
                     <label htmlFor="password">Password</label>
                     <input type="password" id="password" name="password" placeholder="Make it secure" value={data.password} onChange={this.onChange}/>
-                    {errors.password && <InlineError text={errors.password} />}
                 </div>
                 <button type="submit">Login</button>
             </form>
         )
     }
-}
-
-LoginForm.propTypes = {
-    submit: PropTypes.func.isRequired
 }
 
 export default LoginForm;

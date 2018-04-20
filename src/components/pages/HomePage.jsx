@@ -1,5 +1,5 @@
 import React from "react";
-import HomeIntro from "../HomeIntro"
+import HomeIntro from "../sections/HomeIntro"
 
 const HomePage = () => (
     <HomeIntro/>
