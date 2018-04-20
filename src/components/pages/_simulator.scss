@@ -1,0 +1,10 @@
+.card {
+    transition: border 500ms;
+    &:hover {
+        cursor: pointer;
+        border-color: black;
+    }
+    &.active {
+        border: solid 1px #008c53;
+    }
+}
