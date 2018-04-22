@@ -37,11 +37,13 @@ class Simulator extends React.Component {
         }
     }
 
-    getUpdatedLoanValue = (paymentRealValue) => {
-        return Math.round(paymentRealValue * 60 * 0.6666);
+    getUpdatedLoanValue = (paymentValue) => {
+
+        return Math.round(paymentValue * 60 * 0.6666);
+
     }
 
-    getUpdatedOffers = (paymentRealValue, newLoanValue) => {
+    getUpdatedOffers = (paymentValue, newLoanValue) => {
 
         let updatedOffers = {};
 
@@ -50,7 +52,7 @@ class Simulator extends React.Component {
             let offer = {...this.state.offers[keyName]};
             const offerInterestRate = offer.interestRate;
             const offerRealDuration = offer.durationInMonths;
-            const totalPayment = ( paymentRealValue * offerRealDuration ) + ( ( paymentRealValue * offerRealDuration ) * ( offerInterestRate / 100 ) );
+            const totalPayment = ( paymentValue * offerRealDuration ) + ( ( paymentValue * offerRealDuration ) * ( offerInterestRate / 100 ) );
             const balance = totalPayment - newLoanValue;
             const newInterestTotal = Math.round( balance * (offer.interestPercentage / 100) );
             const newOpheliaAccountTotal = Math.round( balance * (offer.opheliaPercentage / 100) );
@@ -66,10 +68,10 @@ class Simulator extends React.Component {
 
     }
 
-    handleChangePayment = (paymentRealValue) => {
+    handleChangePayment = (paymentValue) => {
 
-        const newLoanValue = this.getUpdatedLoanValue(paymentRealValue);
-        const newOffers = this.getUpdatedOffers(paymentRealValue, newLoanValue);
+        const newLoanValue = this.getUpdatedLoanValue(paymentValue);
+        const newOffers = this.getUpdatedOffers(paymentValue, newLoanValue);
 
         this.setState({
             loanValue: newLoanValue,
@@ -79,9 +81,11 @@ class Simulator extends React.Component {
     }
 
     render() {
+
         return (
             <SimulatorUI offers={this.state.offers} loanValue={this.state.loanValue} onChangePayment={this.handleChangePayment} />
         );
+
     }
 }
 

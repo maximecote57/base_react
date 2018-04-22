@@ -6,16 +6,23 @@ import OfferCard from "../sections/OfferCard";
 class SimulatorUI_Step1 extends React.Component {
 
     handleClickOffer = (newSelectedOffer) => {
+
         this.props.onChangeSelectedOffer(newSelectedOffer);
+
     }
 
     handleChange = (event, maskedValue, floatValue) => {
+
         this.props.onChangePayment(floatValue, maskedValue);
+
     }
 
     render() {
+
         const offers = this.props.offers;
+
         return (
+
             <div className="component">
                 <div className="container">
                     <div className="pt-5">
@@ -66,7 +73,8 @@ class SimulatorUI_Step1 extends React.Component {
                     </div>
                 </div>
             </div>
-        );
+
+        )
     }
 }
 

@@ -32,7 +32,9 @@ class SimulatorUI extends React.Component {
     }
 
     changeStep = (stepId) => {
-        this.setState({step: stepId}, () => window.scrollTo(0, 0));
+        this.setState({
+            step: stepId
+        }, () => window.scrollTo(0, 0));
     }
 
     render() {
@@ -48,7 +50,7 @@ class SimulatorUI extends React.Component {
                     <SimulatorUI_Step3 />
                 }
             </div>
-        );
+        )
     }
 }
 

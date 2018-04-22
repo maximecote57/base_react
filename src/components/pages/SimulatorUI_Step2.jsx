@@ -1,6 +1,7 @@
 import React from "react";
 
 const SimulatorUI_Step2 = (props) => (
+
     <div className="component">
         <div className="container">
             <div className="pt-5">
@@ -127,6 +128,7 @@ const SimulatorUI_Step2 = (props) => (
             </div>
         </div>
     </div>
+
 )
 
 export default SimulatorUI_Step2;
