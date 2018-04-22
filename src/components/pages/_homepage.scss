@@ -116,6 +116,11 @@
             height: 5.56em;
         }
     }
+    &__link {
+        & + #{&} {
+            margin-left: 1em;
+        }
+    }
 }
 
 @media (min-width: 768px) {

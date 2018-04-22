@@ -1,0 +1,16 @@
+{
+    "en" : {
+        "document.title" : "Ophelia | Get the best out of your debts",
+        "homepage.title" : "The only debt payment that thickens your wallet.",
+        "homepage.sub_title_header" : "Impossible?",
+        "homepage.sub_title" : "We will convince you of the contrary in a few weeks.",
+        "homepage.page_title" : "Ophelia | Get the best out of your debts"
+    },
+    "fr" : {
+        "document.title" : "Ophelia | Tirez le meilleur de vos dettes",
+        "homepage.title" : "Le remboursement de dette qui vous enrichit",
+        "homepage.sub_title_header" : "Impossible?",
+        "homepage.sub_title" : "Nous allons vous convaincre du contraire très bientôt.",
+        "homepage.page_title" : "Ophelia | Tirez le meilleur de vos dettes"
+    }
+}
