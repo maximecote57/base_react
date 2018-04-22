@@ -1,7 +1,8 @@
 import React from "react";
 
-import CurrencyInput from 'react-currency-input';
-import OfferCard from "../sections/OfferCard";
+import SimulatorUI_Step1 from "./SimulatorUI_Step1"
+import SimulatorUI_Step2 from "./SimulatorUI_Step2"
+import SimulatorUI_Step3 from "./SimulatorUI_Step3"
 
 import "./_simulator.scss";
 
@@ -10,80 +11,42 @@ class SimulatorUI extends React.Component {
     constructor() {
         super();
         this.state = {
+            step: 1,
             selectedOffer: null,
-            paymentRealValue: 0,
             paymentMaskedValue: 0
         }
     }
 
-    handleClickOffer = (newSelectedOffer) => {
-        this.setState({selectedOffer: newSelectedOffer});
-    }
-
-
-    handleBlurPayment = () => {
-        this.props.onBlurPayment(this.state.paymentRealValue);
-    }
-
-    handleChange = (event, maskedValue, floatValue) => {
+    handleChangePayment = (paymentRealValue, paymentMaskedValue) => {
+        this.props.onChangePayment(paymentRealValue);
         this.setState({
-            paymentRealValue: floatValue,
-            paymentMaskedValue: maskedValue
-        });
+            paymentMaskedValue: paymentMaskedValue
+        })
+    }
+
+    handleChangeSelectedOffer = (newSelectedOffer) => {
+        this.setState({
+            selectedOffer: newSelectedOffer
+        })
+
+    }
+
+    changeStep = (stepId) => {
+        this.setState({step: stepId}, () => window.scrollTo(0, 0));
     }
 
     render() {
-        const offers = this.props.offers;
         return (
-            <div className="component">
-                <div className="container">
-                    <div className="pt-5">
-                        <h1 className="display-4 text-center">Vos offres personnalisées</h1>
-                    </div>
-                    <div className="pt-5">
-                        <div className="row justify-content-center">
-                            <div className="col-md-auto">
-                                <div className="form-group">
-                                    <label htmlFor="loan_value">Montant du prêt</label>
-                                    <div className="input-group">
-                                        <div className="input-group-append">
-                                            <div className="input-group-text">$</div>
-                                        </div>
-                                        <input className="form-control" name="loan_value" type="number" placeholder="0" value={this.props.loanValue}/>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="col-md-auto">
-                                <div className="form-group">
-                                    <label htmlFor="monthly_payment">Paiement mensuel</label>
-                                    <div className="input-group">
-                                        <div className="input-group-append">
-                                            <div className="input-group-text">$</div>
-                                        </div>
-                                        <CurrencyInput ref={this.paymentInput} className="form-control" onBlur={this.handleBlurPayment} onChangeEvent={this.handleChange} precision="0" value={this.state.paymentMaskedValue}/>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="pt-5">
-                        <h3 className="font-weight-normal text-center">Choisissez parmi l’une des 3 offres ci-dessous.</h3>
-                    </div>
-                    <div className="pt-5">
-                        <div className="row">
-                            {Object.keys(offers).map((keyName, keyindex) =>
-                                <div className="col-md-4" key={keyName}>
-                                    <OfferCard number={keyName} duration={offers[keyName].duration} interestRate={offers[keyName].interestRate} interestTotal={offers[keyName].interestTotal} opheliaAccountTotal={offers[keyName].opheliaAccountTotal} active={this.state.selectedOffer == keyName} onClick={this.handleClickOffer.bind(this, keyName)}/>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                    <div className="pt-5">
-                        <div className="text-center">
-                            <button type="button" className="btn btn-primary btn-lg">Confirmer mon choix</button>
-                        </div>
-                    </div>
-                </div>
+            <div>
+                {this.state.step == 1 &&
+                    <SimulatorUI_Step1 onChangeSelectedOffer={this.handleChangeSelectedOffer} onChangePayment={this.handleChangePayment} offers={this.props.offers} loanValue={this.props.loanValue} onClickChangeStep={this.changeStep} paymentMaskedValue={this.state.paymentMaskedValue} selectedOffer={this.state.selectedOffer}/>
+                }
+                {this.state.step == 2 &&
+                    <SimulatorUI_Step2 onClickChangeStep={this.changeStep}/>
+                }
+                {this.state.step == 3 &&
+                    <SimulatorUI_Step3 />
+                }
             </div>
         );
     }
