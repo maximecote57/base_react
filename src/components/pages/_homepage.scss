@@ -77,7 +77,9 @@
             max-width: 500px;
         }
         &-wrapper {
-            transform: translateY(4.69em);
+            @media (min-width: 991px) {
+                transform: translateY(4.69em);
+            }
             @media (max-width: 767px) {
                 padding-top: 2.25em;
             }

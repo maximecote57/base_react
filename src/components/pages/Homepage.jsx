@@ -36,7 +36,7 @@ class Homepage extends React.Component {
                     </div>
                 </div>
                 <div className="main-section__middle d-flex align-items-center">
-                    <div className="row align-items-center">
+                    <div className="row align-items-center no-gutters">
                         <div className="left-col">
                             <h1 className="main-section__title no-opacity js-main-title">The only debt payment<br /> that thickens your wallet.</h1>
                             <div className="main-section__sub-title-wrapper">
