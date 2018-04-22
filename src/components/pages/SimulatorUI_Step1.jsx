@@ -1,6 +1,6 @@
 import React from "react";
 
-import CurrencyInput from 'react-currency-input';
+import NumberFormat from 'react-number-format';
 import OfferCard from "../sections/OfferCard";
 
 class SimulatorUI_Step1 extends React.Component {
@@ -11,9 +11,9 @@ class SimulatorUI_Step1 extends React.Component {
 
     }
 
-    handleChange = (event, maskedValue, floatValue) => {
+    handleChange = (values) => {
 
-        this.props.onChangePayment(floatValue, maskedValue);
+        this.props.onChangePayment(values.floatValue);
 
     }
 
@@ -37,7 +37,7 @@ class SimulatorUI_Step1 extends React.Component {
                                         <div className="input-group-append">
                                             <div className="input-group-text">$</div>
                                         </div>
-                                        <input className="form-control" name="loan_value" type="number" placeholder="0" value={this.props.loanValue} disabled/>
+                                        <NumberFormat className="form-control" decimalScale={0} value={this.props.loanValue} thousandSeparator={true} disabled/>
                                     </div>
                                 </div>
                             </div>
@@ -48,7 +48,7 @@ class SimulatorUI_Step1 extends React.Component {
                                         <div className="input-group-append">
                                             <div className="input-group-text">$</div>
                                         </div>
-                                        <CurrencyInput className="form-control" onChangeEvent={this.handleChange} precision="0" value={this.props.paymentMaskedValue}/>
+                                        <NumberFormat className="form-control" decimalScale={0} value={this.props.paymentValue} onValueChange={this.handleChange} thousandSeparator={true} />
                                     </div>
                                 </div>
                             </div>

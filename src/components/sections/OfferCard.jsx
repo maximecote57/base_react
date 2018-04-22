@@ -1,4 +1,5 @@
 import React from "react";
+import NumberFormat from 'react-number-format';
 
 const OfferCard = (offer) => (
     <div className={"card " + (offer.active ? 'active' : '')} onClick={offer.onClick}>
@@ -19,11 +20,11 @@ const OfferCard = (offer) => (
         <div className="card-footer">
             <h6 className="mb-2">
                 <span className="font-weight-bold">Total des intérêts: </span>
-                <span>{offer.interestTotal}$</span>
+                <NumberFormat value={offer.interestTotal} displayType={'text'} thousandSeparator={true} suffix={'$'} />
             </h6>
             <h6 className="mb-2">
                 <span className="font-weight-bold">Total du compte Ophelia: </span>
-                <span>{offer.opheliaAccountTotal}$</span>
+                <NumberFormat value={offer.opheliaAccountTotal} displayType={'text'} thousandSeparator={true} suffix={'$'} />
             </h6>
         </div>
         }

@@ -13,18 +13,22 @@ class SimulatorUI extends React.Component {
         this.state = {
             step: 1,
             selectedOffer: null,
-            paymentMaskedValue: 0
+            paymentValue: 0
         }
     }
 
-    handleChangePayment = (paymentRealValue, paymentMaskedValue) => {
-        this.props.onChangePayment(paymentRealValue);
+    handleChangePayment = (paymentValue) => {
+
         this.setState({
-            paymentMaskedValue: paymentMaskedValue
+            paymentValue: isNaN(paymentValue) ? "" : paymentValue
         })
+
+        this.props.onChangePayment(isNaN(paymentValue) ? 0 : paymentValue);
+
     }
 
     handleChangeSelectedOffer = (newSelectedOffer) => {
+
         this.setState({
             selectedOffer: newSelectedOffer
         })
@@ -32,16 +36,18 @@ class SimulatorUI extends React.Component {
     }
 
     changeStep = (stepId) => {
+
         this.setState({
             step: stepId
         }, () => window.scrollTo(0, 0));
+
     }
 
     render() {
         return (
             <div>
                 {this.state.step == 1 &&
-                    <SimulatorUI_Step1 onChangeSelectedOffer={this.handleChangeSelectedOffer} onChangePayment={this.handleChangePayment} offers={this.props.offers} loanValue={this.props.loanValue} onClickChangeStep={this.changeStep} paymentMaskedValue={this.state.paymentMaskedValue} selectedOffer={this.state.selectedOffer}/>
+                    <SimulatorUI_Step1 onChangeSelectedOffer={this.handleChangeSelectedOffer} onChangePayment={this.handleChangePayment} offers={this.props.offers} loanValue={this.props.loanValue} onClickChangeStep={this.changeStep} paymentValue={this.state.paymentValue} selectedOffer={this.state.selectedOffer}/>
                 }
                 {this.state.step == 2 &&
                     <SimulatorUI_Step2 onClickChangeStep={this.changeStep}/>
