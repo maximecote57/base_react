@@ -11,7 +11,7 @@ class SimulatorUI extends React.Component {
     constructor() {
         super();
         this.state = {
-            step: 1,
+            currentStep: 1,
             selectedOffer: null,
             paymentValue: 0
         }
@@ -42,7 +42,7 @@ class SimulatorUI extends React.Component {
     changeStep = (stepId) => {
 
         this.setState({
-            step: stepId
+            currentStep: stepId
         }, () => window.scrollTo(0, 0));
 
     }
@@ -50,13 +50,13 @@ class SimulatorUI extends React.Component {
     render() {
         return (
             <div>
-                {this.state.step == 1 &&
+                {this.state.currentStep == 1 &&
                     <SimulatorUI_Step1 onChangeSelectedOffer={this.handleChangeSelectedOffer} onChangePayment={this.handleChangePayment} offers={this.props.offers} loanValue={this.props.loanValue} onClickChangeStep={this.changeStep} paymentValue={this.state.paymentValue} selectedOffer={this.state.selectedOffer}/>
                 }
-                {this.state.step == 2 &&
+                {this.state.currentStep == 2 &&
                     <SimulatorUI_Step2 onClickChangeStep={this.changeStep} loanValue={this.props.loanValue} opheliaAccountTotal={this.props.offers[this.state.selectedOffer].opheliaAccountTotal} />
                 }
-                {this.state.step == 3 &&
+                {this.state.currentStep == 3 &&
                     <SimulatorUI_Step3 />
                 }
             </div>
