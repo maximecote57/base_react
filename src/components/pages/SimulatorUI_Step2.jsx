@@ -7,16 +7,16 @@ const SimulatorUI_Step2 = (props) => (
     <div className="component">
         <div className="container">
             <div className="pt-5">
-                <h1 className="display-4 text-center">Récapitulons:</h1>
+                <h1 className="font-weight-bold text-primary text-center">Récapitulons:</h1>
             </div>
             <div className="pt-5">
                 <div className="row">
                     <div className="col-md-6">
                         <div className="text-center">
-                            <h3>Avant</h3>
+                            <h3 className="font-weight-bold text-primary">Avant</h3>
                         </div>
                         <table className="table">
-                            <thead className="thead thead-dark">
+                            <thead className="thead bg-secondary text-white font-weight-bold">
                                 <tr>
                                     <th>Prêts</th>
                                     <th></th>
@@ -26,7 +26,7 @@ const SimulatorUI_Step2 = (props) => (
                             <tbody>
                                 <tr>
                                     <td>
-                                        <h5>VISA OR Élégance Desjardins</h5>
+                                        <h6>VISA OR Élégance Desjardins</h6>
                                         <span>4540 33** **** 8019</span>
                                     </td>
                                     <td>
@@ -38,7 +38,7 @@ const SimulatorUI_Step2 = (props) => (
                                 </tr>
                                 <tr>
                                     <td>
-                                        <h5>069226-PP1 Prêt personnel</h5>
+                                        <h6>069226-PP1 Prêt personnel</h6>
                                         <span>Lac des Deux-Montagnes</span>
                                     </td>
                                     <td>
@@ -48,7 +48,7 @@ const SimulatorUI_Step2 = (props) => (
                                         <span>17,50%</span>
                                     </td>
                                 </tr>
-                                <tr className="table-success">
+                                <tr className="table-secondary">
                                     <td>
                                         <h4>Total</h4>
                                     </td>
@@ -65,10 +65,10 @@ const SimulatorUI_Step2 = (props) => (
                     </div>
                     <div className="col-md-6">
                         <div className="text-center">
-                            <h3>Après</h3>
+                            <h3 className="font-weight-bold text-primary">Après</h3>
                         </div>
                         <table className="table">
-                            <thead className="thead thead-dark">
+                            <thead className="thead bg-secondary text-white font-weight-bold">
                             <tr>
                                 <th>Prêts</th>
                                 <th>Solde</th>
@@ -90,7 +90,7 @@ const SimulatorUI_Step2 = (props) => (
                             </tbody>
                         </table>
                         <table className="table">
-                            <thead className="thead thead-dark">
+                            <thead className="thead bg-secondary text-white font-weight-bold">
                             <tr>
                                 <th>Tremplin financier	</th>
                                 <th></th>

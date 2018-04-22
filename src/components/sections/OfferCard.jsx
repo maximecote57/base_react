@@ -1,9 +1,11 @@
 import React from "react";
 import NumberFormat from 'react-number-format';
 
+import "./_offer-card.scss";
+
 const OfferCard = (offer) => (
-    <div className={"card " + (offer.active ? 'active' : '')} onClick={offer.onClick}>
-        <div className="card-header">
+    <div className={"card offer-card " + (offer.active ? 'active' : '')} onClick={offer.onClick}>
+        <div className="card-header bg-secondary text-white">
             <span className="font-weight-bold">Offre #{offer.number}</span>
         </div>
         <div className="card-body">
@@ -17,7 +19,7 @@ const OfferCard = (offer) => (
             </h6>
         </div>
         { offer.active == 1 &&
-        <div className="card-footer">
+        <div className="card-footer bg-light">
             <h6 className="mb-2">
                 <span className="font-weight-bold">Total des intérêts: </span>
                 <NumberFormat value={offer.interestTotal} displayType={'text'} thousandSeparator={true} suffix={'$'} />
