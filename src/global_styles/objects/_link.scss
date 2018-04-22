@@ -1,0 +1,10 @@
+.link {
+    color: #055036;
+    font-size: 1.5em;
+    &:hover {
+        color: #055036;
+    }
+    @media (max-width: 767px) {
+        font-size: 1em;
+    }
+}

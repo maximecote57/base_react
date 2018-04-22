@@ -1,6 +1,7 @@
 import React from "react";
 
 import SimulatorUI from "./SimulatorUI";
+import Navbar from "../sections/Navbar"
 
 class Simulator extends React.Component {
 
@@ -83,7 +84,10 @@ class Simulator extends React.Component {
     render() {
 
         return (
-            <SimulatorUI offers={this.state.offers} loanValue={this.state.loanValue} onChangePayment={this.handleChangePayment} />
+            <div>
+                <Navbar />
+                <SimulatorUI offers={this.state.offers} loanValue={this.state.loanValue} onChangePayment={this.handleChangePayment} />
+            </div>
         );
 
     }
