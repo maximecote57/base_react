@@ -50,7 +50,7 @@ class SimulatorUI extends React.Component {
                     <SimulatorUI_Step1 onChangeSelectedOffer={this.handleChangeSelectedOffer} onChangePayment={this.handleChangePayment} offers={this.props.offers} loanValue={this.props.loanValue} onClickChangeStep={this.changeStep} paymentValue={this.state.paymentValue} selectedOffer={this.state.selectedOffer}/>
                 }
                 {this.state.step == 2 &&
-                    <SimulatorUI_Step2 onClickChangeStep={this.changeStep}/>
+                    <SimulatorUI_Step2 onClickChangeStep={this.changeStep} loanValue={this.props.loanValue} opheliaAccountTotal={this.props.offers[this.state.selectedOffer].opheliaAccountTotal} />
                 }
                 {this.state.step == 3 &&
                     <SimulatorUI_Step3 />

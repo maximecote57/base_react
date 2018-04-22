@@ -1,5 +1,7 @@
 import React from "react";
 
+import NumberFormat from 'react-number-format';
+
 const SimulatorUI_Step2 = (props) => (
 
     <div className="component">
@@ -28,7 +30,7 @@ const SimulatorUI_Step2 = (props) => (
                                         <span>4540 33** **** 8019</span>
                                     </td>
                                     <td>
-                                        <span>5 000,00$</span>
+                                        <span>5,000$</span>
                                     </td>
                                     <td>
                                         <span>19,90%</span>
@@ -40,7 +42,7 @@ const SimulatorUI_Step2 = (props) => (
                                         <span>Lac des Deux-Montagnes</span>
                                     </td>
                                     <td>
-                                        <span>5 000,00$</span>
+                                        <span>5,000$</span>
                                     </td>
                                     <td>
                                         <span>17,50%</span>
@@ -51,7 +53,7 @@ const SimulatorUI_Step2 = (props) => (
                                         <h4>Total</h4>
                                     </td>
                                     <td>
-                                        <h4>10 000,00$</h4>
+                                        <h4>10,000$</h4>
                                     </td>
                                     <td>
                                         <h4>18,70%</h4>
@@ -79,7 +81,7 @@ const SimulatorUI_Step2 = (props) => (
                                     <span>Mon prêt Ophelia</span>
                                 </td>
                                 <td>
-                                    <span>10 000,00$</span>
+                                    <NumberFormat decimalScale={0} displayType="text" value={props.loanValue} thousandSeparator={true} suffix={"$"} />
                                 </td>
                                 <td>
                                     <span>10,00%</span>
@@ -103,7 +105,7 @@ const SimulatorUI_Step2 = (props) => (
                                 <td>
                                 </td>
                                 <td>
-                                    <span>4 653$</span>
+                                    <NumberFormat decimalScale={0} displayType="text" value={props.opheliaAccountTotal} thousandSeparator={true} suffix={"$"} />
                                 </td>
                             </tr>
                             </tbody>
