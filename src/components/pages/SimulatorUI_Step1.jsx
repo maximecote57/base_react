@@ -25,10 +25,10 @@ class SimulatorUI_Step1 extends React.Component {
 
             <div className="component">
                 <div className="container">
-                    <div className="pt-5">
+                    <div className="pt-3">
                         <h1 className="display-4 text-center">Vos offres personnalisées</h1>
                     </div>
-                    <div className="pt-5">
+                    <div className="pt-3">
                         <div className="row justify-content-center">
                             <div className="col-md-auto">
                                 <div className="form-group">
@@ -54,10 +54,10 @@ class SimulatorUI_Step1 extends React.Component {
                             </div>
                         </div>
                     </div>
-                    <div className="pt-5">
+                    <div className="pt-3">
                         <h3 className="font-weight-normal text-center">Choisissez parmi l’une des 3 offres ci-dessous.</h3>
                     </div>
-                    <div className="pt-5">
+                    <div className="pt-3">
                         <div className="row">
                             {Object.keys(offers).map((keyName) =>
                                 <div className="col-md-4 pb-4 pb-md-0" key={keyName}>
@@ -66,7 +66,7 @@ class SimulatorUI_Step1 extends React.Component {
                             )}
                         </div>
                     </div>
-                    <div className="pt-5 pb-5">
+                    <div className="pt-3 pb-5">
                         <div className="text-center">
                             <button type="button" className="btn btn-primary btn-lg" disabled={!this.props.selectedOffer} onClick={this.props.onClickChangeStep.bind(this, 2)}>Confirmer mon choix</button>
                         </div>

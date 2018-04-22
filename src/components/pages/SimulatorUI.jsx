@@ -29,6 +29,10 @@ class SimulatorUI extends React.Component {
 
     handleChangeSelectedOffer = (newSelectedOffer) => {
 
+        if(newSelectedOffer == this.state.selectedOffer) {
+            newSelectedOffer = null;
+        }
+
         this.setState({
             selectedOffer: newSelectedOffer
         })
