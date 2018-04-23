@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from 'react-router-dom';
+import {injectIntl} from 'react-intl';
 import {FormattedMessage} from 'react-intl';
 
 import logo_ophelia from "../../images/logo_ophelia.svg";
@@ -9,8 +10,10 @@ import "./_homepage.scss";
 
 class Homepage extends React.Component {
 
-    constructor() {
+    constructor({intl}) {
         super();
+        this.availableLangs = ["en", "fr"];
+        this.currentLang = intl.locale;
     }
 
     componentDidMount = () => {
@@ -33,8 +36,8 @@ class Homepage extends React.Component {
                     <div className="main-section__top-right-wrapper">
                         <Link to="/simulator" className="main-section__link link" >Simulator</Link>
                         {this.props.availableLangs.map((lang) => {
-                            if(lang == this.props.currentLang) return;
-                            return <a key={lang} className="main-section__link link text-uppercase" href="javascript:void(0)" onClick={this.props.onLangChange.bind(this, lang)}>{lang}</a>
+                            if(lang == this.currentLang) return;
+                            return <a key={lang} className="main-section__link link text-uppercase" href={"/" + lang} >{lang}</a>
                         })}
                     </div>
                 </div>
@@ -76,4 +79,4 @@ class Homepage extends React.Component {
     }
 }
 
-export default Homepage;
+export default injectIntl(Homepage);
