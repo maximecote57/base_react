@@ -12,22 +12,29 @@ import Simulator from './components/pages/Simulator';
 import "./global_styles/global_styles.scss";
 
 const cookies = new Cookies();
+const defaultLang = "en";
+const availableLangs = ["en", "fr"];
 
-addLocaleData(fr);
 addLocaleData(en);
+addLocaleData(fr);
 
 class App extends Component {
 
     constructor() {
         super();
         this.state = {
-            currentLang: cookies.get('lang') || "en",
-            availableLangs: ["en", "fr"]
+            currentLang: cookies.get('lang') || defaultLang,
+            availableLangs: availableLangs
         }
     }
 
     updateDocumentTitle = () => {
-        document.title = this.state.currentLang == "en" ? 'Ophelia | Get the best out of your debts' : 'Ophelia | Tirez le meilleur de vos dettes';
+        const {intl} = new IntlProvider({
+            locale: this.state.currentLang,
+            messages: Strings[this.state.currentLang],
+        }, {}).getChildContext();
+        document.title = intl.formatMessage({id: "document.title" });
+
     }
 
     componentDidMount() {
