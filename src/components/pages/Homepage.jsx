@@ -1,7 +1,8 @@
 import React from "react";
 import { Link } from 'react-router-dom';
-import {injectIntl} from 'react-intl';
-import {FormattedMessage} from 'react-intl';
+import { injectIntl } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
+import Translator from "../tools/translator";
 
 import logo_ophelia from "../../images/logo_ophelia.svg";
 import drawing_man_piggy_bank from "../../images/drawing_man_piggy_bank.png";
@@ -12,8 +13,7 @@ class Homepage extends React.Component {
 
     constructor({intl}) {
         super();
-        this.availableLangs = ["en", "fr"];
-        this.currentLang = intl.locale;
+        this.intl = intl;
     }
 
     componentDidMount = () => {
@@ -34,9 +34,9 @@ class Homepage extends React.Component {
                         <img className="main-section__logo" src={logo_ophelia} />
                     </div>
                     <div className="main-section__top-right-wrapper">
-                        <Link to="/simulator" className="main-section__link link" >Simulator</Link>
+                        <Link to={"/" + this.intl.formatMessage({id: "simulator.slug"})} className="main-section__link link"><FormattedMessage id="simulator.title" defaultMessage="Simulator"/></Link>
                         {this.props.availableLangs.map((lang) => {
-                            if(lang == this.currentLang) return;
+                            if(lang == this.intl.locale) return;
                             return <a key={lang} className="main-section__link link text-uppercase" href={"/" + lang} >{lang}</a>
                         })}
                     </div>

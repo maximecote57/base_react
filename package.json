@@ -49,6 +49,7 @@
     "sass-loader": "^7.0.1",
     "style-loader": "^0.20.3",
     "universal-cookie": "^2.1.2",
+    "url-parse": "^1.4.0",
     "validator": "^9.4.1"
   }
 }
