@@ -1,3 +1,37 @@
 .navbar {
-    padding: 1em 1.5em;
+    padding: 0.5em 1.5em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #dedede;
+    &__links-container {
+        display: flex;
+        align-items: center;
+    }
+    &__link-wrapper {
+        & + #{&} {
+            margin-left: 1em;
+        }
+    }
+    &__link {
+        position: relative;
+        &:after {
+            content: '';
+            position: absolute;
+            bottom: -0.2em;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background-color: black;
+            transition: width 250ms;
+        }
+        &:hover {
+            &:after {
+                width: 100%;
+            }
+        }
+    }
+    &__logo {
+        max-width: 3em;
+    }
 }

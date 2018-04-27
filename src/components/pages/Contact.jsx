@@ -1,9 +1,9 @@
 import React from "react";
 import { injectIntl, FormattedMessage } from 'react-intl';
 
-import "./_homepage.scss";
+import "./_contact.scss";
 
-class Homepage extends React.Component {
+class Contact extends React.Component {
 
     render() {
         return (
@@ -11,12 +11,12 @@ class Homepage extends React.Component {
                 <div className="container">
                     <div className="page-title">
                         <h1>
-                            <FormattedMessage id="homepage.title" default="Homepage" />
+                            <FormattedMessage id="contact.title"/>
                         </h1>
                     </div>
                     <div>
                         <p>
-                            <FormattedMessage id="homepage.description"/>
+                            <FormattedMessage id="contact.description"/>
                         </p>
                     </div>
                 </div>
@@ -26,4 +26,4 @@ class Homepage extends React.Component {
     }
 }
 
-export default injectIntl(Homepage);
+export default injectIntl(Contact);

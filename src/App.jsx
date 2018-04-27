@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
-import { Switch, Route, Redirect } from 'react-router-dom';
+import { Switch, Route } from 'react-router-dom';
 import {Helmet} from "react-helmet";
 import {injectIntl} from 'react-intl';
 
 import Translator from "./components/tools/translator";
 import Homepage from "./components/pages/Homepage";
-import Simulator from './components/pages/Simulator';
+import Contact from "./components/pages/Contact";
+import Navbar from "./components/sections/Navbar";
 
 import "./global_styles/global_styles.scss";
 
@@ -23,13 +24,14 @@ class App extends Component {
                 <Helmet>
                     <title>{documentTitle}</title>
                 </Helmet>
+                <Navbar availableLangs={this.props.availableLangs} />
                 <Switch>
                     {/* Generic routes */}
                     <Route path="/" exact render={(...props) => <Homepage {...props} availableLangs={this.props.availableLangs} />} />
                     {/* EN routes */}
-                    <Route path={"/" + Translator('simulator.slug', 'en')} component={Simulator} />
+                    <Route path={"/" + Translator('contact.slug', 'en')} component={Contact} />
                     {/* FR routes */}
-                    <Route path={"/" + Translator('simulator.slug', 'fr')} component={Simulator} />
+                    <Route path={"/" + Translator('contact.slug', 'fr')} component={Contact} />
                 </Switch>
             </div>
         )

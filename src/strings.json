@@ -1,20 +1,18 @@
 {
     "en" : {
-        "document.title" : "Ophelia | Get the best out of your debts",
-        "homepage.title" : "The only debt payment that thickens your wallet.",
-        "homepage.sub_title_header" : "Impossible?",
-        "homepage.sub_title" : "We will convince you of the contrary in a few weeks.",
-        "homepage.page_title" : "Ophelia | Get the best out of your debts",
-        "simulator.title" : "Simulator",
-        "simulator.slug" : "simulator"
+        "document.title" : "Base Reptile",
+        "homepage.title" : "Home",
+        "homepage.description" : "Homepage description",
+        "contact.title" : "Contact",
+        "contact.slug" : "contact",
+        "contact.description" : "Contact page description"
     },
     "fr" : {
-        "document.title" : "Ophelia | Tirez le meilleur de vos dettes",
-        "homepage.title" : "Le remboursement de dette qui vous enrichit",
-        "homepage.sub_title_header" : "Impossible?",
-        "homepage.sub_title" : "Nous allons vous convaincre du contraire très bientôt.",
-        "homepage.page_title" : "Ophelia | Tirez le meilleur de vos dettes",
-        "simulator.title" : "Simulateur",
-        "simulator.slug" : "simulateur"
+        "document.title" : "Base Reptile",
+        "homepage.title" : "Accueil",
+        "homepage.description" : "Description de la page d'accueil",
+        "contact.title" : "Contact",
+        "contact.slug" : "contact",
+        "contact.description" : "Description de la page de contact"
     }
 }
