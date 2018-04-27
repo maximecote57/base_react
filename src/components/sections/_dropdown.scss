@@ -1,0 +1,40 @@
+@import '../../global_styles/settings/bootstrap-overrides';
+
+.dropdown {
+    position: relative;
+    min-width: 16em;
+    &__btn {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        background-color: $light;
+        color: black;
+        cursor: pointer;
+        border: solid 1px black;
+        padding: 0.375rem 0.75rem;
+        line-height: 1.5;
+    }
+    &__list {
+        display: none;
+        position: absolute;
+        z-index: 1;
+        top: auto;
+        left: 0;
+        width: 100%;
+        background-color: white;
+        border: solid 1px $secondary;
+        border-top: none;
+        max-height: 12.5em;
+        overflow: auto;
+        &.is-opened {
+            display: block;
+        }
+    }
+    &__item {
+        display: block;
+        padding: 0.5em;
+        color: black;
+        font-size: 0.9em;
+    }
+}

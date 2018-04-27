@@ -1,3 +1,12 @@
-table {
+table, .table {
     table-layout: fixed;
+    &--not-fixed {
+        table-layout: auto;
+    }
+    &__large-cell {
+        width: 25%;
+    }
+    &__small-cell {
+        width: 55px;
+    }
 }

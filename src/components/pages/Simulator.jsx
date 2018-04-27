@@ -3,14 +3,18 @@ import React from "react";
 import SimulatorUI from "./SimulatorUI";
 import Navbar from "../sections/Navbar"
 
+import Data from "../../data.json";
+
 class Simulator extends React.Component {
 
     constructor() {
         super();
         this.state = {
+            currentStep: 1,
             loanValue: 0,
             offers: {
                 1 : {
+                    description: "Je veux avoir le plus petit taux d’intérêt possible",
                     durationInMonths: 60,
                     interestRate: 17,
                     interestPercentage: 85,
@@ -19,6 +23,7 @@ class Simulator extends React.Component {
                     opheliaAccountTotal: 0,
                 },
                 2 : {
+                    description: "Je veux rembourser le plus rapidement possible",
                     durationInMonths: 72,
                     interestRate: 13,
                     interestPercentage: 55,
@@ -27,6 +32,7 @@ class Simulator extends React.Component {
                     opheliaAccountTotal: 0
                 },
                 3 : {
+                    description: "Je veux accumuler le maximum d’argent",
                     durationInMonths: 84,
                     interestRate: 10,
                     interestPercentage: 34,
@@ -34,50 +40,41 @@ class Simulator extends React.Component {
                     interestTotal: 0,
                     opheliaAccountTotal: 0,
                 }
-            }
+            },
+            debts: [
+                {
+                    id: 1,
+                    institution : "",
+                    loanType: "",
+                    monthlyPayment: 0,
+                    interestsRate: 0,
+                    balance: 0
+                }
+            ],
+            paymentValue: 0,
+            selectedOffer: null
         }
     }
 
-    getUpdatedLoanValue = (paymentValue) => {
-
-        return Math.round(paymentValue * 60 * 0.6666);
-
-    }
-
-    getUpdatedOffers = (paymentValue, newLoanValue) => {
-
-        let updatedOffers = {};
-
-        Object.keys(this.state.offers).map(keyName => {
-
-            let offer = {...this.state.offers[keyName]};
-            const offerInterestRate = offer.interestRate;
-            const offerRealDuration = offer.durationInMonths;
-            const totalPayment = ( paymentValue * offerRealDuration ) + ( ( paymentValue * offerRealDuration ) * ( offerInterestRate / 100 ) );
-            const balance = totalPayment - newLoanValue;
-            const newInterestTotal = Math.round( balance * (offer.interestPercentage / 100) );
-            const newOpheliaAccountTotal = Math.round( balance * (offer.opheliaPercentage / 100) );
-
-            offer.interestTotal = newInterestTotal;
-            offer.opheliaAccountTotal = newOpheliaAccountTotal;
-
-            updatedOffers[keyName] = offer;
-
-        });
-
-        return updatedOffers;
-
-    }
-
-    handleChangePayment = (paymentValue) => {
-
-        const newLoanValue = this.getUpdatedLoanValue(paymentValue);
-        const newOffers = this.getUpdatedOffers(paymentValue, newLoanValue);
+    changeStep = (stepId) => {
 
         this.setState({
-            loanValue: newLoanValue,
-            offers: newOffers
-        });
+            currentStep: stepId
+        }, () => window.scrollTo(0, 0));
+
+    }
+
+
+    updateSelectedOffer = (selectedOffer) => {
+
+        this.setState({selectedOffer})
+    }
+
+    onUpdate = (newState, newStep) => {
+
+        newState['currentStep'] = newStep;
+
+        this.setState(newState, () => console.log(this.state));
 
     }
 
@@ -86,7 +83,7 @@ class Simulator extends React.Component {
         return (
             <div>
                 <Navbar />
-                <SimulatorUI offers={this.state.offers} loanValue={this.state.loanValue} onChangePayment={this.handleChangePayment} />
+                <SimulatorUI selectedOffer={this.state.selectedOffer} paymentValue={this.state.paymentValue} onUpdate={this.onUpdate} onChangeSelectedOffer={this.updateSelectedOffer} data={Data} debts={this.state.debts} currentStep={this.state.currentStep} onChangeStep={this.changeStep} offers={this.state.offers} loanValue={this.state.loanValue} onChangePayment={this.handleChangePayment} />
             </div>
         );
 

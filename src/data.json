@@ -1,0 +1,27 @@
+{
+	"institutions": [
+		"Desjardins",
+		"Banque de Montréal (BMO)",
+		"Banque Scotia",
+		"Banque Royale",
+		"Banque TD",
+		"Banque Nationale",
+		"Banque CIBC",
+		"HSBC Canada",
+		"Banque Laurentienne",
+		"Tangerine",
+		"Capital One",
+		"MBNA",
+		"Canadian Tire",
+		"President's Choice",
+		"Autre"
+	],
+	"loanTypes": [
+		"Carte de crédit",
+		"Prêt personnel",
+		"Marge de crédit",
+		"Prêt automobile",
+		"Meubles",
+		"Autre (précisez)"
+	]
+}

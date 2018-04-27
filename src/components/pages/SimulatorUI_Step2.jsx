@@ -1,136 +1,58 @@
 import React from "react";
+import SimpleOfferCard from "../sections/SimpleOfferCard";
 
-import NumberFormat from 'react-number-format';
+class SimulatorUI_Step2 extends React.Component {
 
-const SimulatorUI_Step2 = (props) => (
+    constructor(props) {
 
-    <div className="component">
-        <div className="container">
-            <div className="pt-5">
-                <h1 className="font-weight-bold text-primary text-center">Récapitulons:</h1>
-            </div>
-            <div className="pt-5">
-                <div className="row">
-                    <div className="col-md-6">
-                        <div className="text-center">
-                            <h3 className="font-weight-bold text-primary">Avant</h3>
+        super(props);
+
+        this.state = {
+            selectedOffer: this.props.selectedOffer
+        }
+
+    }
+
+    handleClickOffer = (selectedOffer) => {
+
+        this.setState({selectedOffer})
+
+    }
+
+    render() {
+        const offers = this.props.offers;
+        return (
+
+            <div className="component">
+                <div className="container">
+                    <div className="pt-3">
+                        <h1 className="text-primary text-center font-weight-bold">Personnalisez votre prêt Ophelia</h1>
+                        <h4 className="pt-3 font-weight-normal text-center">Pour vous faire les meilleures offres, nous voulons savoir quelle est votre préférence parmi les 3 choix suivants.</h4>
+                    </div>
+                    <div className="pt-5">
+                        <div className="row">
+                            {Object.keys(offers).map((keyName) =>
+                                <div className="col-md-4 pb-4 pb-md-0" key={keyName}>
+                                    <SimpleOfferCard active={this.state.selectedOffer == keyName} onClick={this.handleClickOffer.bind(this, keyName)} description={offers[keyName].description} />
+                                </div>
+                            )}
                         </div>
-                        <table className="table">
-                            <thead className="thead bg-secondary text-white font-weight-bold">
-                                <tr>
-                                    <th>Prêts</th>
-                                    <th></th>
-                                    <th>Taux d’intérêt</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <h6>VISA OR Élégance Desjardins</h6>
-                                        <span>4540 33** **** 8019</span>
-                                    </td>
-                                    <td>
-                                        <span>5,000$</span>
-                                    </td>
-                                    <td>
-                                        <span>19,90%</span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <h6>069226-PP1 Prêt personnel</h6>
-                                        <span>Lac des Deux-Montagnes</span>
-                                    </td>
-                                    <td>
-                                        <span>5,000$</span>
-                                    </td>
-                                    <td>
-                                        <span>17,50%</span>
-                                    </td>
-                                </tr>
-                                <tr className="table-secondary">
-                                    <td>
-                                        <h4>Total</h4>
-                                    </td>
-                                    <td>
-                                        <h4>10,000$</h4>
-                                    </td>
-                                    <td>
-                                        <h4>18,70%</h4>
-                                        <span>(moyenne)</span>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
-                    <div className="col-md-6">
+                    <div className="pt-5">
                         <div className="text-center">
-                            <h3 className="font-weight-bold text-primary">Après</h3>
+                            <button type="button" className="btn btn-primary btn-lg" onClick={this.props.onUpdate.bind(this, this.state, 3)} disabled={!this.state.selectedOffer}>Poursuivre</button>
+                            <div className="text-center pt-1">
+                                <a className="fs-" onClick={this.props.onUpdate.bind(this, this.state, 1)} href="javascript:void(0)">
+                                    <small>Revenir en arrière</small>
+                                </a>
+                            </div>
                         </div>
-                        <table className="table">
-                            <thead className="thead bg-secondary text-white font-weight-bold">
-                            <tr>
-                                <th>Prêts</th>
-                                <th>Solde</th>
-                                <th>Taux d’intérêt</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>
-                                    <span>Mon prêt Ophelia</span>
-                                </td>
-                                <td>
-                                    <NumberFormat decimalScale={0} displayType="text" value={props.loanValue} thousandSeparator={true} suffix={"$"} />
-                                </td>
-                                <td>
-                                    <span>10,00%</span>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                        <table className="table">
-                            <thead className="thead bg-secondary text-white font-weight-bold">
-                            <tr>
-                                <th>Tremplin financier	</th>
-                                <th></th>
-                                <th>Solde*</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>
-                                    <span>Mon compte Ophelia</span>
-                                </td>
-                                <td>
-                                </td>
-                                <td>
-                                    <NumberFormat decimalScale={0} displayType="text" value={props.opheliaAccountTotal} thousandSeparator={true} suffix={"$"} />
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
-            <div className="pt-5">
-                <div className="text-center">
-                    <button type="button" className="btn btn-primary btn-lg" onClick={props.onClickChangeStep.bind(this, 3)}>C'est mon choix final!</button>
-                    <div className="text-center pt-1">
-                        <a className="fs-" onClick={props.onClickChangeStep.bind(this, 1)} href="#">
-                            <small>Revenir en arrière</small>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div className="pt-5 pb-5">
-                <div className="text-right">
-                    <small>*Total à l’extinction du prêt Ophelia</small>
-                </div>
-            </div>
-        </div>
-    </div>
 
-)
+        )
+    }
+}
 
 export default SimulatorUI_Step2;
