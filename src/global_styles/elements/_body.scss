@@ -1,2 +1,5 @@
 body {
+    &.hidden-overflow {
+        overflow: hidden;
+    }
 }

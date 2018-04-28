@@ -7,6 +7,7 @@ import Translator from "./components/tools/translator";
 import Homepage from "./components/pages/Homepage";
 import Contact from "./components/pages/Contact";
 import Navbar from "./components/sections/Navbar";
+import MobileMenu from "./components/sections/MobileMenu";
 
 import "./global_styles/global_styles.scss";
 
@@ -24,7 +25,8 @@ class App extends Component {
                 <Helmet>
                     <title>{documentTitle}</title>
                 </Helmet>
-                <Navbar availableLangs={this.props.availableLangs} />
+                { this.props.viewportWidth > this.props.mobileMenuBreakpoint && <Navbar availableLangs={this.props.availableLangs} /> }
+                { this.props.viewportWidth <= this.props.mobileMenuBreakpoint && <MobileMenu availableLangs={this.props.availableLangs}  /> }
                 <Switch>
                     {/* Generic routes */}
                     <Route path="/" exact render={(...props) => <Homepage {...props} availableLangs={this.props.availableLangs} />} />
