@@ -12,15 +12,16 @@ addLocaleData(en);
 addLocaleData(fr);
 
 const cookies = new Cookies();
-const availableLangs = ["en", "fr"];
 const currentURLPathname = window.location.pathname;
 const firstPathSegment = currentURLPathname !== "/" ? currentURLPathname.split('/')[1] : "";
-const viewportWidth = window.innerWidth;
-const mobileMenuBreakpoint = 991;
-
 let currentLang = "en";
+let settings = {};
 
-if(availableLangs.indexOf(firstPathSegment) !== -1 ) {
+settings.viewportWidth = window.innerWidth;
+settings.mobileMenuBreakpoint = 991;
+settings.availableLangs = ["en", "fr"];
+
+if(settings.availableLangs.indexOf(firstPathSegment) !== -1 ) {
     currentLang = firstPathSegment;
 }
 else if(cookies.get('lang')) {
@@ -30,7 +31,7 @@ else if(cookies.get('lang')) {
 ReactDOM.render(
     <IntlProvider locale={currentLang} messages={Strings[currentLang]}>
         <BrowserRouter basename={"/" + currentLang}>
-            <App availableLangs={availableLangs} viewportWidth={viewportWidth} mobileMenuBreakpoint={mobileMenuBreakpoint} />
+            <App settings={settings} />
         </BrowserRouter>
     </IntlProvider>
     , document.getElementById('app'));
