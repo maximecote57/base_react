@@ -21,6 +21,7 @@ class MobileMenu extends React.Component {
 
         this.pagesToPutLinks= [
             "homepage",
+            "products",
             "contact"
         ];
         this.externalURLsToPutLinks= [
@@ -87,14 +88,13 @@ class MobileMenu extends React.Component {
             event.preventDefault()
         }
 
-    }
+    };
 
     isMobileMenuContentTotallyScrolled = () => {
 
         return this.mobileMenuContent.scrollHeight - this.mobileMenuContent.scrollTop <= this.mobileMenuContent.clientHeight;
 
-    }
-
+    };
 
     render() {
 
@@ -107,7 +107,7 @@ class MobileMenu extends React.Component {
                     <div className="mobile-menu__header-section">
                     </div>
                     <div className="mobile-menu__header-section">
-                        <LangSwitcher availableLangs={this.props.availableLangs}/>
+                        <LangSwitcher availableLangs={this.props.availableLangs} currentPageName={this.props.currentPageName}/>
                         <button className={"mobile-menu__hamburger mobile-menu__hamburger--squeeze " + (this.state.isOpened ? 'is-active' : '')} type="button" onClick={this.handleClickHamburger}>
                           <span className="mobile-menu__hamburger-container">
                             <span className="mobile-menu__hamburger-inner"></span>
