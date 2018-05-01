@@ -21,44 +21,123 @@ class Products extends React.Component {
     constructor() {
 
         super();
+        this.productsContainer = null;
+        this.lazyLoadTriggerPosition = null;
         this.consumer_key = 'ck_d4eb559b025f8e28c9b5defc99fa7447fad93f53';
         this.consumer_password = 'cs_2c1f842b775ad46c44ced6dbebea174e3068edc7';
         this.hideFiltersWithNoItems = true;
         this.allowMultipleFilters = true;
+        this.lazyLoadCurrentOffset = 0;
+        this.maxNbOfProducts = 30;
+        this.lazyLoadConfig = {
+            isActive: false,
+            nbOfItemsPerLoad: 30
+        };
         this.state = {
-            products: null,
-            productsCategories: null,
+            products: [],
+            productsCategories: [],
             activeProductsCategories: [],
-            categoriesInLoadedProducts: []
+            categoriesOfLoadedProducts: [],
+            areProductsLoading: false,
+            areProductsCategoriesLoading: false
         }
 
     }
 
-    componentDidMount = () => {
+    getCategoriesInProducts = (products) => {
 
+        let categoriesInProducts = [];
 
-        fetch('https://adriengagnon.com/wp-json/wc/v2/products/categories?consumer_key=' + this.consumer_key + "&consumer_secret=" + this.consumer_password + "&per_page=30")
+        products.map((product) => {
+            if(product.categories.length > 0) {
+                categoriesInProducts.push(product.categories[0].id)
+            }
+        });
+
+        return categoriesInProducts;
+
+    };
+
+    getProductsCategories = () => {
+
+        this.setState({
+            areProductsCategoriesLoading: true
+        });
+
+        fetch('https://adriengagnon.com/wp-json/wc/v2/products/categories?consumer_key=' + this.consumer_key + "&consumer_secret=" + this.consumer_password)
             .then(response => response.json())
             .then((productsCategories) => {
-                    this.setState({productsCategories})
+                    this.setState({
+                        productsCategories,
+                        areProductsCategoriesLoading: false
+                    })
                 }
             )
 
-        fetch('https://adriengagnon.com/wp-json/wc/v2/products?consumer_key=' + this.consumer_key + "&consumer_secret=" + this.consumer_password + "&per_page=30")
+    };
+
+    getProducts = () => {
+
+        const lazyLoadConfig = this.lazyLoadConfig;
+
+        this.setState({
+            areProductsLoading: true
+        });
+
+        let fetchUrl = 'https://adriengagnon.com/wp-json/wc/v2/products?consumer_key=' + this.consumer_key + "&consumer_secret=" + this.consumer_password;
+
+        if(lazyLoadConfig.isActive) {
+            fetchUrl = fetchUrl + "&per_page=" + this.lazyLoadConfig.nbOfItemsPerLoad + "&offset=" + this.lazyLoadCurrentOffset
+        }
+        else {
+            fetchUrl = fetchUrl + "&per_page=" + this.maxNbOfProducts;
+        }
+
+        fetch(fetchUrl)
             .then(response => response.json())
             .then((products) => {
-                    let categoriesInLoadedProducts = [];
-                    products.map((product) => {
-                        if(product.categories.length > 0) {
-                            categoriesInLoadedProducts.push(product.categories[0].id)
-                        }
-                    })
+
+                    const newProducts = [...this.state.products, ...products];
+
+                    if(lazyLoadConfig.isActive) {
+                        this.lazyLoadCurrentOffset = this.lazyLoadCurrentOffset + this.lazyLoadConfig.nbOfItemsPerLoad;
+                        document.addEventListener('scroll', this.handleScroll);
+                    }
+
                     this.setState({
-                        products,
-                        categoriesInLoadedProducts
+                        products: newProducts,
+                        categoriesOfLoadedProducts : this.getCategoriesInProducts(newProducts),
+                        areProductsLoading: false
                     })
+
                 }
             )
+
+    };
+
+
+    componentDidMount = () => {
+
+        this.getProducts();
+        this.getProductsCategories();
+
+    };
+
+    componentDidUpdate = () => {
+
+        if(this.lazyLoadConfig.isActive) {
+            this.lazyLoadTriggerPosition = (this.productsContainer.offsetTop + this.productsContainer.offsetHeight) * 0.75
+        }
+
+    };
+
+    handleScroll = (e) => {
+
+        if(window.scrollY >= this.lazyLoadTriggerPosition) {
+            document.removeEventListener('scroll', this.handleScroll);
+            this.getProducts();
+        }
+
     };
 
     handleClickFilter = (filterId) => {
@@ -80,12 +159,34 @@ class Products extends React.Component {
 
     }
 
+    getFilteredProducts = () => {
+
+        let filteredProducts = [];
+
+        this.state.products.map((product) => {
+            const productCategories = product.categories;
+            let productMainCategoryId = null;
+            if(productCategories.length > 0) {
+                productMainCategoryId = productCategories[0].id;
+            }
+            if(this.state.activeProductsCategories.length == 0 || this.state.activeProductsCategories.indexOf(productMainCategoryId) !== -1 ) {
+                filteredProducts.push(product);
+            }
+        })
+
+        return filteredProducts;
+
+    }
+
     render() {
 
         const products = this.state.products;
         const productsCategories = this.state.productsCategories;
         const activeProductsCategories = this.state.activeProductsCategories;
-        const categoriesInLoadedProducts = this.state.categoriesInLoadedProducts;
+        const categoriesOfLoadedProducts = this.state.categoriesOfLoadedProducts;
+        const areProductsLoading = this.state.areProductsLoading;
+        const areProductsCategoriesLoading = this.state.areProductsCategoriesLoading;
+        const filteredProducts = this.getFilteredProducts();
 
         return (
             <div className="products component">
@@ -103,8 +204,11 @@ class Products extends React.Component {
                     <div className="products__container">
                         <div className="products__filters-container">
                             <h2 className="products__filters-title"><FormattedMessage id="generic.filters" default="Filters"/></h2>
-                            {!productsCategories &&
+                            {(productsCategories.length === 0 && areProductsCategoriesLoading) &&
                                 <div><FormattedMessage id="products.loading-products-categories" default="Loading products categories"/></div>
+                            }
+                            {(productsCategories.length === 0 && !areProductsCategoriesLoading) &&
+                                <div><FormattedMessage id="products.no-products-categories" default="No products categories."/></div>
                             }
                             {(productsCategories && productsCategories.length > 0) &&
                                 productsCategories.map((productsCategory) => {
@@ -117,10 +221,10 @@ class Products extends React.Component {
                                     else if(!products) {
                                         showFilter = true;
                                     }
-                                    else if(categoriesInLoadedProducts.indexOf(productsCategory.id) !== -1) {
+                                    else if(categoriesOfLoadedProducts.indexOf(productsCategory.id) !== -1) {
                                         showFilter = true;
                                     }
-                                    else if(categoriesInLoadedProducts.length === 0) {
+                                    else if(categoriesOfLoadedProducts.length === 0) {
                                         showFilter = true;
                                     }
 
@@ -134,32 +238,25 @@ class Products extends React.Component {
                                 })
                             }
                         </div>
-                        <div className="products__products-container">
+                        <div className="products__products-container" ref={(productsContainer) => this.productsContainer = productsContainer}>
                             <div className="products__products-row">
-                                {!products &&
+                                {(filteredProducts.length > 0) &&
+                                    filteredProducts.map((product) => {
+                                        return (
+                                            <div className="products__products-row-item" key={product.id}>
+                                                <div className="products__product-container">
+                                                    <img className="products__product-img" src={product.images[0].src}/>
+                                                    <h3 className="products__product-title">{product.name}</h3>
+                                                </div>
+                                            </div>
+                                        )
+                                    })
+                                }
+                                {areProductsLoading &&
                                     <div><FormattedMessage id="products.loading-products" default="Loading products..."/></div>
                                 }
-                                {(products && products.length === 0) &&
+                                {!areProductsLoading && filteredProducts.length === 0 &&
                                     <div><FormattedMessage id="products.no-products" default="No products"/></div>
-                                }
-                                {(products && products.length > 0) &&
-                                    products.map((product) => {
-                                        const productCategories = product.categories;
-                                        let productMainCategoryId = null;
-                                        if(productCategories.length > 0) {
-                                            productMainCategoryId = productCategories[0].id;
-                                        }
-                                        if(activeProductsCategories.length == 0 || activeProductsCategories.indexOf(productMainCategoryId) !== -1 ) {
-                                            return (
-                                                <div className="products__products-row-item" key={product.id}>
-                                                    <div className="products__product-container">
-                                                        <img className="products__product-img" src={product.images[0].src}/>
-                                                        <h3 className="products__product-title">{product.name}</h3>
-                                                    </div>
-                                                </div>
-                                            )
-                                        }
-                                    })
                                 }
                             </div>
                         </div>
