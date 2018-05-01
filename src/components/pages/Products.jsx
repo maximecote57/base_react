@@ -13,6 +13,7 @@
 
 import React from "react";
 import { injectIntl, FormattedMessage } from 'react-intl';
+import Pager from "../sections/Pager"
 
 import "./_products.scss";
 
@@ -28,11 +29,21 @@ class Products extends React.Component {
         this.hideFiltersWithNoItems = true;
         this.allowMultipleFilters = true;
         this.lazyLoadCurrentOffset = 0;
-        this.maxNbOfProducts = 30;
+        this.nbOfProductsPerPage = 10;
         this.lazyLoadConfig = {
             isActive: false,
             nbOfItemsPerLoad: 30
         };
+        this.apiURLProducts = 'https://adriengagnon.com/wp-json/wc/v2/products?consumer_key=' + this.consumer_key + "&consumer_secret=" + this.consumer_password;
+        this.apiURLProductsCategories = 'https://adriengagnon.com/wp-json/wc/v2/products/categories?consumer_key=' + this.consumer_key + "&consumer_secret=" + this.consumer_password;
+
+        if(this.lazyLoadConfig.isActive) {
+            this.apiURLProducts = this.apiURLProducts + "&per_page=" + this.lazyLoadConfig.nbOfItemsPerLoad + "&offset=" + this.lazyLoadCurrentOffset
+        }
+        else {
+            this.apiURLProducts = this.apiURLProducts + "&per_page=" + this.nbOfProductsPerPage + "&offset=" + this.lazyLoadCurrentOffset;
+        }
+
         this.state = {
             products: [],
             productsCategories: [],
@@ -64,7 +75,7 @@ class Products extends React.Component {
             areProductsCategoriesLoading: true
         });
 
-        fetch('https://adriengagnon.com/wp-json/wc/v2/products/categories?consumer_key=' + this.consumer_key + "&consumer_secret=" + this.consumer_password)
+        fetch(this.apiURLProductsCategories)
             .then(response => response.json())
             .then((productsCategories) => {
                     this.setState({
@@ -84,16 +95,7 @@ class Products extends React.Component {
             areProductsLoading: true
         });
 
-        let fetchUrl = 'https://adriengagnon.com/wp-json/wc/v2/products?consumer_key=' + this.consumer_key + "&consumer_secret=" + this.consumer_password;
-
-        if(lazyLoadConfig.isActive) {
-            fetchUrl = fetchUrl + "&per_page=" + this.lazyLoadConfig.nbOfItemsPerLoad + "&offset=" + this.lazyLoadCurrentOffset
-        }
-        else {
-            fetchUrl = fetchUrl + "&per_page=" + this.maxNbOfProducts;
-        }
-
-        fetch(fetchUrl)
+        fetch(this.apiURLProducts)
             .then(response => response.json())
             .then((products) => {
 
@@ -157,6 +159,10 @@ class Products extends React.Component {
 
         this.setState({activeProductsCategories})
 
+    };
+
+    handleClickPager = () => {
+        console.log('clicked on pager item');
     }
 
     getFilteredProducts = () => {
@@ -187,6 +193,7 @@ class Products extends React.Component {
         const areProductsLoading = this.state.areProductsLoading;
         const areProductsCategoriesLoading = this.state.areProductsCategoriesLoading;
         const filteredProducts = this.getFilteredProducts();
+        const isLadyLoadActive = this.lazyLoadConfig.isActive;
 
         return (
             <div className="products component">
@@ -238,9 +245,10 @@ class Products extends React.Component {
                                 })
                             }
                         </div>
-                        <div className="products__products-container" ref={(productsContainer) => this.productsContainer = productsContainer}>
-                            <div className="products__products-row">
-                                {(filteredProducts.length > 0) &&
+                        <div className="products__products-container">
+                            <div ref={(productsContainer) => this.productsContainer = productsContainer}>
+                                <div className="products__products-row">
+                                    {(filteredProducts.length > 0) &&
                                     filteredProducts.map((product) => {
                                         return (
                                             <div className="products__products-row-item" key={product.id}>
@@ -251,12 +259,18 @@ class Products extends React.Component {
                                             </div>
                                         )
                                     })
-                                }
-                                {areProductsLoading &&
+                                    }
+                                    {areProductsLoading &&
                                     <div><FormattedMessage id="products.loading-products" default="Loading products..."/></div>
-                                }
-                                {!areProductsLoading && filteredProducts.length === 0 &&
+                                    }
+                                    {!areProductsLoading && filteredProducts.length === 0 &&
                                     <div><FormattedMessage id="products.no-products" default="No products"/></div>
+                                    }
+                                </div>
+                            </div>
+                            <div>
+                                {(!isLadyLoadActive && products.length > this.nbOfProductsPerPage) &&
+                                <Pager nbOfItems={filteredProducts.length} nbOfProductsPerPage={this.nbOfProductsPerPage} onClick={this.handleClickPager}/>
                                 }
                             </div>
                         </div>

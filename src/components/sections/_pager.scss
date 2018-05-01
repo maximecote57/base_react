@@ -1,0 +1,11 @@
+.pager {
+    display: flex;
+    justify-content: center;
+    &__item {
+        padding: 1em;
+        cursor: pointer;
+        &.is-active {
+            font-weight: bold;
+        }
+    }
+}
