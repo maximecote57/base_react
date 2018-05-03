@@ -23,7 +23,6 @@ class Products extends React.Component {
     constructor() {
 
         super();
-        this.nbOfProductsPerPage = 10;
         this.isLazyLoadActive = false;
         this.lazyLoadTriggerPositionOffset = 1000;
         this.hideFiltersWithNoItems = false;
@@ -31,11 +30,10 @@ class Products extends React.Component {
         this.sortPerPageOptions = [10,25,50];
         this.consumer_key = 'ck_d4eb559b025f8e28c9b5defc99fa7447fad93f53';
         this.consumer_password = 'cs_2c1f842b775ad46c44ced6dbebea174e3068edc7';
-        this.baseApiURLProducts = 'https://adriengagnon.com/wp-json/wc/v2/products?consumer_key=' + this.consumer_key + "&consumer_secret=" + this.consumer_password;
+        this.baseApiURLProducts = 'https://adriengagnon.com/wp-json/wc/v2/products?per_page=100&consumer_key=' + this.consumer_key + "&consumer_secret=" + this.consumer_password;
         this.baseApiURLProductsCategories = 'https://adriengagnon.com/wp-json/wc/v2/products/categories?consumer_key=' + this.consumer_key + "&consumer_secret=" + this.consumer_password + "&per_page=100";
 
         this.productsContainer = null;
-        this.currentOffset = 0;
         this.lazyLoadTriggerPosition = null;
 
         this.state = {
@@ -44,7 +42,9 @@ class Products extends React.Component {
             activeProductsCategories: [],
             categoriesOfLoadedProducts: [],
             areProductsLoading: false,
-            areProductsCategoriesLoading: false
+            areProductsCategoriesLoading: false,
+            currentOffset: 0,
+            nbOfProductsPerPage: 10
         }
 
     }
@@ -65,50 +65,67 @@ class Products extends React.Component {
 
     getProductsCategories = () => {
 
-        this.setState({
-            areProductsCategoriesLoading: true
-        });
+        if(localStorage.getItem('base_react_products_categories')) {
+            const productsFromLocalStorage = JSON.parse(localStorage.getItem('base_react_products_categories'));
+            this.setState({
+                productsCategories: productsFromLocalStorage
+            })
+        }
+        else {
 
-        fetch(this.baseApiURLProductsCategories)
-            .then(response => response.json())
-            .then((productsCategories) => {
+            this.setState({
+                areProductsCategoriesLoading: true
+            });
+
+            fetch(this.baseApiURLProductsCategories)
+                .then(response => response.json())
+                .then((productsCategories) => {
+
+                    localStorage.setItem('base_react_products_categories', JSON.stringify(productsCategories));
                     this.setState({
                         productsCategories,
                         areProductsCategoriesLoading: false
                     })
                 }
-            )
+                )
+        }
 
     };
 
     getProducts = () => {
 
-        const apiURLProducts = this.baseApiURLProducts + "&offset=" + this.currentOffset + "&per_page=" + this.nbOfProductsPerPage;
+        if(localStorage.getItem('base_react_products')) {
+            const productsFromLocalStorage = JSON.parse(localStorage.getItem('base_react_products'));
+            this.setState({
+                products: productsFromLocalStorage,
+                categoriesOfLoadedProducts : this.getCategoriesOfLoadedProducts(productsFromLocalStorage)
+            });
+        }
+        else {
 
-        this.setState({
-            areProductsLoading: true
-        });
+            this.setState({
+                areProductsLoading: true
+            });
 
-        console.log('loading products from ', this.currentOffset, ' to ', this.currentOffset + this.nbOfProductsPerPage)
+            fetch(this.baseApiURLProducts)
+                .then((response) => response.json())
+                .then((products) => {
 
-        fetch(apiURLProducts)
-            .then((response) => response.json())
-            .then((products) => {
+                        if(this.isLazyLoadActive) {
+                            document.addEventListener('scroll', this.handleScroll);
+                        }
 
-                    const updatedProducts = [...this.state.products, ...products];
+                        localStorage.setItem('base_react_products', JSON.stringify(products));
 
-                    if(this.isLazyLoadActive) {
-                        document.addEventListener('scroll', this.handleScroll);
+                        this.setState({
+                            products: products,
+                            categoriesOfLoadedProducts : this.getCategoriesOfLoadedProducts(products),
+                            areProductsLoading: false
+                        })
+
                     }
-
-                    this.setState({
-                        products: updatedProducts,
-                        categoriesOfLoadedProducts : this.getCategoriesOfLoadedProducts(updatedProducts),
-                        areProductsLoading: false
-                    })
-
-                }
-            )
+                )
+        }
 
     };
 
@@ -132,8 +149,9 @@ class Products extends React.Component {
 
         if(window.scrollY >= this.lazyLoadTriggerPosition) {
             document.removeEventListener('scroll', this.handleScroll);
-            this.currentOffset = this.currentOffset + this.nbOfProductsPerPage;
-            this.getProducts();
+            this.setState({
+                currentOffset: this.currentOffset + this.state.nbOfProductsPerPage
+            });
         }
 
     };
@@ -153,28 +171,29 @@ class Products extends React.Component {
             activeProductsCategories.push(filterId);
         }
 
-        this.setState({activeProductsCategories})
+        this.setState({
+            activeProductsCategories,
+            currentOffset: 0
+        })
 
     };
 
     handleClickPager = (newCurrentPage) => {
 
-        this.currentOffset = (newCurrentPage - 1) * this.nbOfProductsPerPage;
-
         this.setState({
-            products: {}
-        }, () => this.getProducts());
+            currentOffset: (newCurrentPage - 1) * this.state.nbOfProductsPerPage
+        });
+
+        window.scrollTo(0, 0);
 
     };
 
     handleClickSortPerPageOption = (sortPerPageOption) => {
 
-        this.currentOffset = 0;
-        this.nbOfProductsPerPage = sortPerPageOption;
-
         this.setState({
-            products: []
-        }, () => this.getProducts());
+            currentOffset: 0,
+            nbOfProductsPerPage: sortPerPageOption
+        });
 
     };
 
@@ -204,7 +223,6 @@ class Products extends React.Component {
 
     render() {
 
-        const products = this.state.products;
         const productsCategories = this.state.productsCategories;
         const activeProductsCategories = this.state.activeProductsCategories;
         const categoriesOfLoadedProducts = this.state.categoriesOfLoadedProducts;
@@ -212,6 +230,7 @@ class Products extends React.Component {
         const areProductsCategoriesLoading = this.state.areProductsCategoriesLoading;
         const filteredProducts = this.getFilteredProducts();
         const isLadyLoadActive = this.isLazyLoadActive;
+        const currentPageProducts = filteredProducts.slice(this.state.currentOffset, this.state.currentOffset + this.state.nbOfProductsPerPage);
 
         return (
             <div className="products component full-height">
@@ -241,7 +260,7 @@ class Products extends React.Component {
                                     let showFilter = true;
 
                                     if(this.hideFiltersWithNoItems) {
-                                        if(products.length !== 0) {
+                                        if(currentPageProducts.length !== 0) {
                                             if(categoriesOfLoadedProducts.length > 0) {
                                                 if(categoriesOfLoadedProducts.indexOf(productsCategory.id) === -1) {
                                                     showFilter = false;
@@ -268,8 +287,8 @@ class Products extends React.Component {
                             </div>
                             <div ref={(productsContainer) => this.productsContainer = productsContainer}>
                                 <div className="products__products-row">
-                                    {(filteredProducts.length > 0) &&
-                                        filteredProducts.map((product) => {
+                                    {(currentPageProducts.length > 0) &&
+                                        currentPageProducts.map((product) => {
                                             return (
                                                 <div className="products__products-row-item" key={product.id}>
                                                     <div className="products__product-container">
@@ -286,15 +305,15 @@ class Products extends React.Component {
                                         <FormattedMessage id="products.loading-products" default="Loading products..."/>
                                     </div>
                                 }
-                                {!areProductsLoading && filteredProducts.length === 0 &&
+                                {!areProductsLoading && currentPageProducts.length === 0 &&
                                     <div>
                                         <FormattedMessage id="products.no-products" default="No products"/>
                                     </div>
                                 }
                             </div>
                             <div>
-                                {!isLadyLoadActive &&
-                                    <Pager currentOffset={this.currentOffset} nbOfItems={100} nbOfProductsPerPage={this.nbOfProductsPerPage} onClick={this.handleClickPager}/>
+                                {(!isLadyLoadActive && currentPageProducts.length > 0 ) &&
+                                    <Pager currentOffset={this.state.currentOffset} nbOfItems={filteredProducts.length} nbOfProductsPerPage={this.state.nbOfProductsPerPage} onClick={this.handleClickPager}/>
                                 }
                             </div>
                         </div>

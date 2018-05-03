@@ -8,7 +8,6 @@ class Pager extends React.Component {
 
         super(props);
 
-        this.nbOfPages = Math.round(props.nbOfItems / props.nbOfProductsPerPage);
         this.maxNbOfVisiblePagerItems = 5;
         this.nbOfPagesSwitchToggle = 3;
 
@@ -16,6 +15,7 @@ class Pager extends React.Component {
 
     render() {
 
+        const nbOfPages = Math.round(this.props.nbOfItems / this.props.nbOfProductsPerPage);
         const activePage = (this.props.currentOffset / this.props.nbOfProductsPerPage) + 1;
         let pagerItems = [];
         let firstPagerItemIndex = activePage - Math.floor(this.maxNbOfVisiblePagerItems / 2);
@@ -24,7 +24,7 @@ class Pager extends React.Component {
             firstPagerItemIndex = 1;
         }
 
-        for (let i = firstPagerItemIndex; i < (firstPagerItemIndex + this.maxNbOfVisiblePagerItems) && i <= this.nbOfPages; i++) {
+        for (let i = firstPagerItemIndex; i < (firstPagerItemIndex + this.maxNbOfVisiblePagerItems) && i <= nbOfPages; i++) {
 
             pagerItems.push(<div className={"pager__item " + (activePage === i ? 'is-active' : '')} key={"pager-cell-" + i} onClick={this.props.onClick.bind(this, i)}>{i}</div>)
 
@@ -48,12 +48,12 @@ class Pager extends React.Component {
                         cell
                     )
                 })}
-                {activePage < this.nbOfPages &&
+                {activePage < nbOfPages &&
                     <div className="pager__item" onClick={this.props.onClick.bind(this, activePage + 1)}>
                         <i className="fas fa-chevron-right"></i>
                     </div>
                 }
-                {activePage <= (this.nbOfPages - this.nbOfPagesSwitchToggle) &&
+                {activePage <= (nbOfPages - this.nbOfPagesSwitchToggle) &&
                     <div className="pager__item" onClick={this.props.onClick.bind(this, activePage + this.nbOfPagesSwitchToggle)}>
                         <i className="fas fa-chevron-right"></i>
                         <i className="fas fa-chevron-right"></i>
