@@ -294,7 +294,7 @@ class Products extends React.Component {
                             </div>
                             <div>
                                 {!isLadyLoadActive &&
-                                    <Pager currentOffset={this.currentOffset} nbOfItems="100" nbOfProductsPerPage={this.nbOfProductsPerPage} onClick={this.handleClickPager}/>
+                                    <Pager currentOffset={this.currentOffset} nbOfItems={100} nbOfProductsPerPage={this.nbOfProductsPerPage} onClick={this.handleClickPager}/>
                                 }
                             </div>
                         </div>
