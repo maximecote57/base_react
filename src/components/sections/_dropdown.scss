@@ -1,14 +1,12 @@
-@import '../../global_styles/settings/bootstrap-overrides';
-
 .dropdown {
     position: relative;
-    min-width: 16em;
+    //min-width: 16em;
     &__btn {
         display: flex;
         justify-content: space-between;
         align-items: center;
         width: 100%;
-        background-color: $light;
+        background-color: white;
         color: black;
         cursor: pointer;
         border: solid 1px black;
@@ -23,7 +21,7 @@
         left: 0;
         width: 100%;
         background-color: white;
-        border: solid 1px $secondary;
+        border: solid 1px black;
         border-top: none;
         max-height: 12.5em;
         overflow: auto;
