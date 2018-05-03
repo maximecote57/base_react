@@ -14,12 +14,6 @@ class Pager extends React.Component {
 
     }
 
-    handleClickItem =  (activePage) => {
-
-        this.props.onClick(activePage);
-
-    };
-
     render() {
 
         const activePage = (this.props.currentOffset / this.props.nbOfProductsPerPage) + 1;
@@ -32,20 +26,20 @@ class Pager extends React.Component {
 
         for (let i = firstPagerItemIndex; i < (firstPagerItemIndex + this.maxNbOfVisiblePagerItems) && i <= this.nbOfPages; i++) {
 
-            pagerItems.push(<div className={"pager__item " + (activePage === i ? 'is-active' : '')} key={"pager-cell-" + i} onClick={this.handleClickItem.bind(this, i)}>{i}</div>)
+            pagerItems.push(<div className={"pager__item " + (activePage === i ? 'is-active' : '')} key={"pager-cell-" + i} onClick={this.props.onClick.bind(this, i)}>{i}</div>)
 
         }
 
         return (
             <div className="pager component">
                 {activePage > this.nbOfPagesSwitchToggle &&
-                    <div className="pager__item" onClick={this.handleClickItem.bind(this, activePage - this.nbOfPagesSwitchToggle)}>
+                    <div className="pager__item" onClick={this.props.onClick.bind(this, activePage - this.nbOfPagesSwitchToggle)}>
                         <i className="fas fa-chevron-left"></i>
                         <i className="fas fa-chevron-left"></i>
                     </div>
                 }
                 {activePage > 1 &&
-                    <div className="pager__item" onClick={this.handleClickItem.bind(this, activePage - 1)}>
+                    <div className="pager__item" onClick={this.props.onClick.bind(this, activePage - 1)}>
                         <i className="fas fa-chevron-left"></i>
                     </div>
                 }
@@ -55,12 +49,12 @@ class Pager extends React.Component {
                     )
                 })}
                 {activePage < this.nbOfPages &&
-                    <div className="pager__item" onClick={this.handleClickItem.bind(this, activePage + 1)}>
+                    <div className="pager__item" onClick={this.props.onClick.bind(this, activePage + 1)}>
                         <i className="fas fa-chevron-right"></i>
                     </div>
                 }
                 {activePage <= (this.nbOfPages - this.nbOfPagesSwitchToggle) &&
-                    <div className="pager__item" onClick={this.handleClickItem.bind(this, activePage + this.nbOfPagesSwitchToggle)}>
+                    <div className="pager__item" onClick={this.props.onClick.bind(this, activePage + this.nbOfPagesSwitchToggle)}>
                         <i className="fas fa-chevron-right"></i>
                         <i className="fas fa-chevron-right"></i>
                     </div>
