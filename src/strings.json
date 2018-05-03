@@ -27,7 +27,7 @@
         "contact.slug" : "contact",
         "products.title" : "Produits",
         "products.slug" : "produits",
-        "products.no-products" : "Aucun produits.",
+        "products.no-products" : "Aucun produit.",
         "products.no-products-categories" : "Aucune catégorie de produits.",
         "products.loading-products" : "Chargement des produits...",
         "products.loading-products-categories" : "Chargement des catégories de produits",
