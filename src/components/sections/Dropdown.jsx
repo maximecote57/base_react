@@ -4,49 +4,47 @@ import "./_dropdown.scss";
 
 class Dropdown extends React.Component {
 
-    constructor(props) {
-        super(props);
+    constructor() {
+
+        super();
 
         this.state = {
-            isOpened: false,
-            defaultTitle: this.props.title || "",
-            value: this.props.value || ""
+            isOpened: false
         }
     }
 
     handleClickBtn =  () => {
 
-        const isBtnOpened = this.state.isOpened;
-
         this.setState({
-            isOpened: !isBtnOpened
+            isOpened: !this.state.isOpened
         })
 
     };
 
-    handleClickItem =  (value) => {
+    handleClickItem =  (item) => {
 
         this.setState({
-            isOpened: false,
-            value: value
+            isOpened: false
         });
 
-        this.props.onClickItem(value);
+        this.props.onClickItem(item);
 
     };
 
     render() {
 
+        const selectedItem = this.props.items.find((item) => item.selected);
+
         return (
             <div className="dropdown component">
                 <button className="dropdown__btn" type="button" onClick={this.handleClickBtn}>
-                    {this.state.value ? this.state.value : this.state.defaultTitle}
+                    {selectedItem.text}
                     <i className="fas fa-chevron-down"></i>
                 </button>
                 <div className={"dropdown__list " + (this.state.isOpened ? 'is-opened' : '')}>
                     {
                         this.props.items.map((item) => {
-                            return <a key={item} className="dropdown__item" href="javascript:void(0)" onClick={this.handleClickItem.bind(this, item)}>{item}</a>
+                            return <a key={item.value} className="dropdown__item" href="javascript:void(0)" onClick={this.handleClickItem.bind(this, item)}>{item.text}</a>
                         })
                     }
                 </div>

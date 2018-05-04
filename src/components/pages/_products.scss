@@ -72,6 +72,9 @@
         &-dropdown {
             flex: 0 0 10em;
             max-width: 10em;
+            & + #{&} {
+                margin-left: 1em;
+            }
         }
     }
 }

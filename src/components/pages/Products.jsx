@@ -24,10 +24,9 @@ class Products extends React.Component {
 
         super();
         this.isLazyLoadActive = false;
-        this.lazyLoadTriggerPositionOffset = 1000;
+        this.LazyLoadTriggerBottomOffset = 250;
         this.hideFiltersWithNoItems = false;
         this.allowMultipleFilters = true;
-        this.sortPerPageOptions = [10,25,50];
         this.consumer_key = 'ck_d4eb559b025f8e28c9b5defc99fa7447fad93f53';
         this.consumer_password = 'cs_2c1f842b775ad46c44ced6dbebea174e3068edc7';
         this.baseApiURLProducts = 'https://adriengagnon.com/wp-json/wc/v2/products?per_page=100&consumer_key=' + this.consumer_key + "&consumer_secret=" + this.consumer_password;
@@ -44,7 +43,38 @@ class Products extends React.Component {
             areProductsLoading: false,
             areProductsCategoriesLoading: false,
             currentOffset: 0,
-            nbOfProductsPerPage: 10
+            nbOfVisibleProductsLazyLoad: 20,
+            nbOfProductsPerPage: 12,
+            sortPerPropertyOptions: [
+                {
+                    text: "Name - A-Z",
+                    value: "alphabetical-asc",
+                    selected: true
+                },
+                {
+                    text: "Name - Z-A",
+                    value: "alphabetical-desc",
+                    selected: false
+                }
+            ],
+            showPerPageOptions: [
+                {
+                    text: "12",
+                    value: 12,
+                    selected: true
+                },
+                {
+                    text: "24",
+                    value: 24,
+                    selected: false
+                },
+                {
+                    text: "48",
+                    value: 48,
+                    selected: false
+                }
+
+            ]
         }
 
     }
@@ -94,8 +124,26 @@ class Products extends React.Component {
 
     getProducts = () => {
 
-        if(localStorage.getItem('base_react_products')) {
-            const productsFromLocalStorage = JSON.parse(localStorage.getItem('base_react_products'));
+        const _MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+        // a and b are javascript Date objects
+        function dateDiffInMinutes(a, b) {
+
+            const diffMs = (b - a); // milliseconds between now & Christmas
+            const diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000); // minutes
+
+            return diffMins;
+        }
+
+        if(localStorage.getItem('base_react_products') && JSON.parse(localStorage.getItem('base_react_products')).data && JSON.parse(localStorage.getItem('base_react_products')).timestamp) {
+
+            const productsFromLocalStorage = JSON.parse(localStorage.getItem('base_react_products')).data;
+            const productsFromLocalStorageTimestamp = JSON.parse(localStorage.getItem('base_react_products')).timestamp;
+
+            if(this.isLazyLoadActive) {
+                document.addEventListener('scroll', this.handleScroll);
+            }
+
             this.setState({
                 products: productsFromLocalStorage,
                 categoriesOfLoadedProducts : this.getCategoriesOfLoadedProducts(productsFromLocalStorage)
@@ -115,7 +163,7 @@ class Products extends React.Component {
                             document.addEventListener('scroll', this.handleScroll);
                         }
 
-                        localStorage.setItem('base_react_products', JSON.stringify(products));
+                        localStorage.setItem('base_react_products', JSON.stringify({data: [...products], timestamp: new Date()}));
 
                         this.setState({
                             products: products,
@@ -140,17 +188,16 @@ class Products extends React.Component {
     componentDidUpdate = () => {
 
         if(this.isLazyLoadActive) {
-            this.lazyLoadTriggerPosition = (this.productsContainer.offsetTop + this.productsContainer.offsetHeight) - this.lazyLoadTriggerPositionOffset
+            this.lazyLoadTriggerPosition = (this.productsContainer.offsetTop + this.productsContainer.offsetHeight) - this.LazyLoadTriggerBottomOffset;
         }
 
     };
 
     handleScroll = (e) => {
 
-        if(window.scrollY >= this.lazyLoadTriggerPosition) {
-            document.removeEventListener('scroll', this.handleScroll);
+        if((window.scrollY + window.innerHeight) >= this.lazyLoadTriggerPosition) {
             this.setState({
-                currentOffset: this.currentOffset + this.state.nbOfProductsPerPage
+                nbOfVisibleProductsLazyLoad: this.state.nbOfVisibleProductsLazyLoad + (this.state.showPerPageOptions.find((option) => option.selected).value)
             });
         }
 
@@ -181,19 +228,43 @@ class Products extends React.Component {
     handleClickPager = (newCurrentPage) => {
 
         this.setState({
-            currentOffset: (newCurrentPage - 1) * this.state.nbOfProductsPerPage
+            currentOffset: (newCurrentPage - 1) * (this.state.showPerPageOptions.find((option) => option.selected).value)
         });
 
         window.scrollTo(0, 0);
 
     };
 
-    handleClickSortPerPageOption = (sortPerPageOption) => {
+    handleShowPerPageOption = (showPerPageOption) => {
+
+        let newShowPerPageOptions = this.state.showPerPageOptions;
+
+        newShowPerPageOptions.map((newShowPerPageOption) => {
+
+            newShowPerPageOption.selected = newShowPerPageOption.value == showPerPageOption.value;
+
+        });
 
         this.setState({
             currentOffset: 0,
-            nbOfProductsPerPage: sortPerPageOption
+            showPerPageOptions: newShowPerPageOptions
         });
+
+    };
+
+    handleClickSortOption = (sortPertPageOption) => {
+
+        let newSortPerPropertyOptions = this.state.sortPerPropertyOptions;
+
+        newSortPerPropertyOptions.map((newSortPerPropertyOption) => {
+
+            newSortPerPropertyOption.selected = newSortPerPropertyOption.value == sortPertPageOption.value;
+
+        });
+
+        this.setState({
+            sortPerPropertyOptions : newSortPerPropertyOptions
+        })
 
     };
 
@@ -230,7 +301,15 @@ class Products extends React.Component {
         const areProductsCategoriesLoading = this.state.areProductsCategoriesLoading;
         const filteredProducts = this.getFilteredProducts();
         const isLadyLoadActive = this.isLazyLoadActive;
-        const currentPageProducts = filteredProducts.slice(this.state.currentOffset, this.state.currentOffset + this.state.nbOfProductsPerPage);
+        const nbOfProductsPerPage = this.state.showPerPageOptions.find((option) => option.selected).value;
+        let currentPageProducts = filteredProducts.slice(this.state.currentOffset, this.state.currentOffset + nbOfProductsPerPage);
+
+        if(this.isLazyLoadActive) {
+            currentPageProducts = filteredProducts.slice(0, this.state.nbOfVisibleProductsLazyLoad);
+        }
+        else {
+            currentPageProducts = filteredProducts.slice(this.state.currentOffset, this.state.currentOffset + nbOfProductsPerPage);
+        }
 
         return (
             <div className="products component full-height">
@@ -281,9 +360,16 @@ class Products extends React.Component {
                         </div>
                         <div className="products__products-container">
                             <div className="products__filters-bar">
-                                <div className="products__filters-bar-dropdown">
-                                    <Dropdown items={this.sortPerPageOptions} title="Per page" onClickItem={this.handleClickSortPerPageOption} />
-                                </div>
+                                {!this.isLazyLoadActive &&
+                                    <div className="products__filters-bar-dropdown">
+                                        <Dropdown items={this.state.showPerPageOptions} onClickItem={this.handleShowPerPageOption}/>
+                                    </div>
+                                }
+                                {!this.isLazyLoadActive &&
+                                    <div className="products__filters-bar-dropdown">
+                                        <Dropdown items={this.state.sortPerPropertyOptions} onClickItem={this.handleClickSortOption}/>
+                                    </div>
+                                }
                             </div>
                             <div ref={(productsContainer) => this.productsContainer = productsContainer}>
                                 <div className="products__products-row">
@@ -312,8 +398,8 @@ class Products extends React.Component {
                                 }
                             </div>
                             <div>
-                                {(!isLadyLoadActive && currentPageProducts.length > 0 ) &&
-                                    <Pager currentOffset={this.state.currentOffset} nbOfItems={filteredProducts.length} nbOfProductsPerPage={this.state.nbOfProductsPerPage} onClick={this.handleClickPager}/>
+                                {(!isLadyLoadActive && currentPageProducts.length > 0 && Math.round(filteredProducts.length / nbOfProductsPerPage) > 1) &&
+                                    <Pager currentOffset={this.state.currentOffset} nbOfItems={filteredProducts.length} nbOfProductsPerPage={nbOfProductsPerPage} onClick={this.handleClickPager}/>
                                 }
                             </div>
                         </div>
