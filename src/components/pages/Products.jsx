@@ -48,6 +48,7 @@ class Products extends React.Component {
             categoriesOfLoadedProducts: [],
             areProductsLoading: false,
             areProductsCategoriesLoading: false,
+            isFiltersMobileMenuVisible: false,
             currentOffset: 0,
             nbOfVisibleProductsLazyLoad: 20,
             nbOfProductsPerPage: 12,
@@ -65,17 +66,17 @@ class Products extends React.Component {
             ],
             showPerPageOptions: [
                 {
-                    text: "12",
+                    text: "12 items per page",
                     value: 12,
                     selected: true
                 },
                 {
-                    text: "24",
+                    text: "24 items per page",
                     value: 24,
                     selected: false
                 },
                 {
-                    text: "48",
+                    text: "48 items per page",
                     value: 48,
                     selected: false
                 }
@@ -182,6 +183,22 @@ class Products extends React.Component {
             sortPerPropertyOptions : newSortPerPropertyOptions,
             filteredProducts: products
         })
+
+    };
+
+    handleClickCloseFilters = () => {
+
+        this.setState({
+            isFiltersMobileMenuVisible: false
+        });
+
+    };
+
+    handleClickOpenFilters = () => {
+
+        this.setState({
+            isFiltersMobileMenuVisible: true
+        });
 
     };
 
@@ -375,8 +392,11 @@ class Products extends React.Component {
                         </p>
                     </div>
                     <div className="products__container">
-                        {this.showFilters &&
+                        {(this.showFilters && (window.innerWidth < 768 ? this.state.isFiltersMobileMenuVisible : true)) &&
                             <div className="products__filters-container">
+                                <div className="products__filters-close-btn" onClick={this.handleClickCloseFilters}>
+                                    <i className="fas fa-times"></i>
+                                </div>
                                 <h2 className="products__filters-title"><FormattedMessage id="generic.filters" default="Filters"/></h2>
                                 {(productsCategories.length === 0 && areProductsCategoriesLoading) &&
                                     <div><FormattedMessage id="products.loading-products-categories" default="Loading products categories"/></div>
@@ -412,16 +432,19 @@ class Products extends React.Component {
                         }
                         <div className="products__products-container">
                             <div className="products__filters-bar">
+                                {window.innerWidth < 768 &&
+                                <div className="products__filters-bar-link">
+                                    <a href="javascript:void(0)" onClick={this.handleClickOpenFilters}>View Filters</a>
+                                </div>
+                                }
                                 {!this.isLazyLoadActive &&
                                     <div className="products__filters-bar-dropdown">
                                         <Dropdown items={this.state.showPerPageOptions} onClickItem={this.handleClickShowPerPageOption}/>
                                     </div>
                                 }
-                                {!this.isLazyLoadActive &&
-                                    <div className="products__filters-bar-dropdown">
-                                        <Dropdown items={this.state.sortPerPropertyOptions} onClickItem={this.handleClickSortOption}/>
-                                    </div>
-                                }
+                                <div className="products__filters-bar-dropdown">
+                                    <Dropdown items={this.state.sortPerPropertyOptions} onClickItem={this.handleClickSortOption}/>
+                                </div>
                             </div>
                             <div ref={(productsContainer) => this.productsContainer = productsContainer}>
                                 <div className="products__products-row">
