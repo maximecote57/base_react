@@ -316,6 +316,7 @@ class Products extends React.Component {
     render() {
 
         const currentPageItems = this.getCurrentPageItems();
+        const nbOfFilteredItems = this.getFilteredItems().length;
 
         return (
             <div className="products component">
@@ -375,13 +376,13 @@ class Products extends React.Component {
                                     <ItemsList items={this.getCurrentPageItems()} />
                                 </div>
                             }
-                            {(!this.isLazyLoadActive && this.getFilteredItems().length > this.state.showPerPage) &&
+                            {(!this.isLazyLoadActive && nbOfFilteredItems > this.state.showPerPage) &&
                                 <div className="products__pager-container">
                                     <Pager
                                         maxNbOfVisiblePagerItems={5}
                                         nbOfPagesSwitchToggle={3}
                                         currentOffset={this.state.currentOffset}
-                                        nbOfItems={this.getFilteredItems().length}
+                                        nbOfItems={nbOfFilteredItems}
                                         nbOfItemsPerPage={this.state.showPerPage}
                                         onClick={this.handleClickPager}
                                     />
