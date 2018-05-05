@@ -26,6 +26,30 @@ class Products extends React.Component {
         this.showFilters = true;
         this.allowMultipleFilters = true;
         this.itemsContainer = null;
+        this.showPerPageOptions = [
+            {
+                text: "12 items per page",
+                value: 12
+            },
+            {
+                text: "24 items per page",
+                value: 24
+            },
+            {
+                text: "48 items per page",
+                value: 48
+            }
+        ];
+        this.sortPerPropertyOptions = [
+            {
+                text: "Name - A-Z",
+                value: "alphabetical-asc"
+            },
+            {
+                text: "Name - Z-A",
+                value: "alphabetical-desc"
+            }
+        ];
 
         this.state = {
             items: [],
@@ -37,35 +61,8 @@ class Products extends React.Component {
             currentOffset: 0,
             isFiltersMobileMenuVisible: false,
             nbOfVisibleItemsLazyLoad: 25,
-            showPerPageOptions: [
-                {
-                    text: "12 items per page",
-                    value: 12,
-                    selected: true
-                },
-                {
-                    text: "24 items per page",
-                    value: 24,
-                    selected: false
-                },
-                {
-                    text: "48 items per page",
-                    value: 48,
-                    selected: false
-                }
-            ],
-            sortPerPropertyOptions: [
-                {
-                    text: "Name - A-Z",
-                    value: "alphabetical-asc",
-                    selected: true
-                },
-                {
-                    text: "Name - Z-A",
-                    value: "alphabetical-desc",
-                    selected: false
-                }
-            ]
+            showPerPage: 12,
+            sortPerProperty: "alphabetical-asc"
         }
 
     }
@@ -203,7 +200,7 @@ class Products extends React.Component {
 
     reorderItems = (items) => {
 
-        const currentSort = this.state.sortPerPropertyOptions.find((option) => option.selected).value;
+        const currentSort = this.state.sortPerProperty;
 
         if(currentSort === "alphabetical-asc") {
 
@@ -243,35 +240,18 @@ class Products extends React.Component {
 
     handleClickShowPerPageOption = (showPerPageOption) => {
 
-        let newShowPerPageOptions = this.state.showPerPageOptions;
-
-        newShowPerPageOptions.map((newShowPerPageOption) => {
-
-            newShowPerPageOption.selected = newShowPerPageOption.value == showPerPageOption.value;
-
-        });
-
         this.setState({
             currentOffset: 0,
-            showPerPageOptions: newShowPerPageOptions,
+            showPerPage: showPerPageOption
         });
 
     };
 
-    handleClickSortOption = (sortPertPageOption) => {
-
-        let newSortPerPropertyOptions = this.state.sortPerPropertyOptions;
-        let items = this.getFilteredItems()
-
-        newSortPerPropertyOptions.map((newSortPerPropertyOption) => {
-
-            newSortPerPropertyOption.selected = newSortPerPropertyOption.value == sortPertPageOption.value;
-
-        });
+    handleClickSortOption = (sortPerPageOption) => {
 
         this.setState({
             currentOffset: 0,
-            sortPerPropertyOptions : newSortPerPropertyOptions,
+            sortPerProperty : sortPerPageOption
         });
 
     };
@@ -289,7 +269,7 @@ class Products extends React.Component {
     handleClickPager = (newCurrentPage) => {
 
         this.setState({
-            currentOffset: (newCurrentPage - 1) * (this.state.showPerPageOptions.find((option) => option.selected).value)
+            currentOffset: (newCurrentPage - 1) * this.state.showPerPage
         });
 
         window.scrollTo(0, 0);
@@ -315,15 +295,15 @@ class Products extends React.Component {
     getCurrentPageItems = () => {
 
         let currentPageItems = this.getFilteredItems();
-        let sliceLimit = null;
+        let sliceLimit = this.state.currentOffset;
 
         this.reorderItems(currentPageItems);
 
         if(this.isLazyLoadActive) {
-            sliceLimit = this.state.currentOffset + this.state.nbOfVisibleItemsLazyLoad;
+            sliceLimit += this.state.nbOfVisibleItemsLazyLoad;
         }
         else {
-            sliceLimit = this.state.currentOffset + this.state.showPerPageOptions.find((option) => option.selected).value;
+            sliceLimit += (this.state.currentOffset + this.state.showPerPage);
         }
 
         currentPageItems = currentPageItems.slice(this.state.currentOffset, sliceLimit);
@@ -377,11 +357,11 @@ class Products extends React.Component {
                                 }
                                 {!this.isLazyLoadActive &&
                                     <div className="products__widget-wrapper">
-                                        <Dropdown items={this.state.showPerPageOptions} onClickItem={this.handleClickShowPerPageOption}/>
+                                        <Dropdown title="Items per Page" items={this.showPerPageOptions} onClickItem={this.handleClickShowPerPageOption}/>
                                     </div>
                                 }
                                 <div className="products__widget-wrapper">
-                                    <Dropdown items={this.state.sortPerPropertyOptions} onClickItem={this.handleClickSortOption}/>
+                                    <Dropdown title="Sort Order" items={this.sortPerPropertyOptions} onClickItem={this.handleClickSortOption}/>
                                 </div>
                             </div>
                             {(currentPageItems.length === 0 && !this.state.areItemsLoading) &&
@@ -395,14 +375,14 @@ class Products extends React.Component {
                                     <ItemsList items={this.getCurrentPageItems()} />
                                 </div>
                             }
-                            {(!this.isLazyLoadActive && this.getFilteredItems().length > this.state.showPerPageOptions.find((option) => option.selected).value) &&
+                            {(!this.isLazyLoadActive && this.getFilteredItems().length > this.state.showPerPage) &&
                                 <div className="products__pager-container">
                                     <Pager
                                         maxNbOfVisiblePagerItems={5}
                                         nbOfPagesSwitchToggle={3}
                                         currentOffset={this.state.currentOffset}
                                         nbOfItems={this.getFilteredItems().length}
-                                        nbOfItemsPerPage={this.state.showPerPageOptions.find((option) => option.selected).value}
+                                        nbOfItemsPerPage={this.state.showPerPage}
                                         onClick={this.handleClickPager}
                                     />
                                 </div>

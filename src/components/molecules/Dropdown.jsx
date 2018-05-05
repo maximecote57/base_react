@@ -9,7 +9,8 @@ class Dropdown extends React.Component {
         super();
 
         this.state = {
-            isOpened: false
+            isOpened: false,
+            selectedItem: null
         }
     }
 
@@ -24,27 +25,26 @@ class Dropdown extends React.Component {
     handleClickItem =  (item) => {
 
         this.setState({
-            isOpened: false
+            isOpened: false,
+            selectedItem: item
         });
 
-        this.props.onClickItem(item);
+        this.props.onClickItem(item.value);
 
     };
 
     render() {
 
-        const selectedItem = this.props.items.find((item) => item.selected);
-
         return (
             <div className="dropdown component">
                 <button className="dropdown__btn" type="button" onClick={this.handleClickBtn}>
-                    {selectedItem.text}
+                    {this.state.selectedItem ? this.state.selectedItem.text : this.props.title}
                     <i className="fas fa-chevron-down"></i>
                 </button>
                 <div className={"dropdown__list " + (this.state.isOpened ? 'is-opened' : '')}>
                     {
                         this.props.items.map((item) => {
-                            return <a key={item.value} className="dropdown__item" href="javascript:void(0)" onClick={this.handleClickItem.bind(this, item)}>{item.text}</a>
+                            return <a key={item.value} className={"dropdown__item " + (this.state.selectedItem === item ? 'is-selected' : '')} href="javascript:void(0)" onClick={this.handleClickItem.bind(this, item)}>{item.text}</a>
                         })
                     }
                 </div>
