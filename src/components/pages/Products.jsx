@@ -30,7 +30,7 @@ class Products extends React.Component {
         this.state = {
             items: [],
             itemsCategories: [],
-            filteredAndOrderedItems: [],
+            currentPageItems: [],
             areItemsLoading: false,
             areItemsCategoriesLoading: false,
             activeItemsCategories: [],
@@ -72,8 +72,8 @@ class Products extends React.Component {
 
     componentDidMount = () => {
 
-        this.getProducts();
-        this.getProductsCategories();
+        this.getItems();
+        this.getItemsCategories();
 
     };
 
@@ -91,43 +91,40 @@ class Products extends React.Component {
 
     };
 
-    getProductsFromLocalStorage = () => {
+    getItemsFromLocalStorage = () => {
 
-        const localStorageProductsObject = JSON.parse(localStorage.getItem('base_react_products'));
-        let localStorageProducts = null;
+        const localStorageItemsObject = JSON.parse(localStorage.getItem('base_react_products'));
+        let localStorageItems = null;
 
-        if(localStorageProductsObject) {
-            const localStorageProductsTimestamp = localStorageProductsObject.timestamp;
-            if(localStorageProductsTimestamp) {
-                const diffInMinutesCachedProducts = getDiffBetweenTwoDatesInMinutes(new Date(localStorageProductsTimestamp), new Date());
+        if(localStorageItemsObject) {
+            const localStorageItemsTimestamp = localStorageItemsObject.timestamp;
+            if(localStorageItemsTimestamp) {
+                const diffInMinutesCachedProducts = getDiffBetweenTwoDatesInMinutes(new Date(localStorageItemsTimestamp), new Date());
                 if(diffInMinutesCachedProducts !== null && diffInMinutesCachedProducts < settings.cacheTimeInMinutes) {
-                    localStorageProducts = localStorageProductsObject.data;
+                    localStorageItems = localStorageItemsObject.data;
                 }
             }
         }
 
-        return localStorageProducts
+        return localStorageItems
 
     };
 
-    getProductsFromAPI = () => {
+    getItemsFromAPI = () => {
 
         return fetch(settings.apiUrlProducts)
             .then((response) => response.json());
 
     }
 
-    getProducts = () => {
+    getItems = () => {
 
-        let productsFromLocalStorage = this.getProductsFromLocalStorage();
+        let itemsFromLocalStorage = this.getItemsFromLocalStorage();
 
-        if(productsFromLocalStorage) {
-
-            this.reorderProducts(productsFromLocalStorage);
+        if(itemsFromLocalStorage) {
 
             this.setState({
-                items: productsFromLocalStorage,
-                filteredAndOrderedItems: productsFromLocalStorage
+                items: itemsFromLocalStorage
             });
 
         }
@@ -137,24 +134,21 @@ class Products extends React.Component {
                 areItemsLoading: true
             });
 
-            this.getProductsFromAPI().then((items) => {
+            this.getItemsFromAPI().then((itemsFromAPI) => {
 
-                localStorage.setItem('base_react_products', JSON.stringify({data: [...items], timestamp: new Date()}));
-
-                this.reorderProducts(items);
+                localStorage.setItem('base_react_products', JSON.stringify({data: [...itemsFromAPI], timestamp: new Date()}));
 
                 this.setState({
-                    items,
-                    filteredAndOrderedItems: items,
+                    items: itemsFromAPI,
                     areItemsLoading: false
-                })
+                });
             })
 
         }
 
     };
 
-    getProductsCategories = () => {
+    getItemsCategories = () => {
 
         if(localStorage.getItem('base_react_products_categories')) {
             const itemsCategoriesFromLocalStorage = JSON.parse(localStorage.getItem('base_react_products_categories'));
@@ -183,12 +177,12 @@ class Products extends React.Component {
 
     };
 
-    getFilteredProducts = (activeItemsCategories) => {
+    getFilteredItems = () => {
 
-        let filteredAndOrderedItems = [];
+        let filteredItems = [];
 
-        if(activeItemsCategories.length === 0) {
-            filteredAndOrderedItems = this.state.items;
+        if(this.state.activeItemsCategories.length === 0) {
+            filteredItems = this.state.items;
         }
         else if(this.state.items.length > 0) {
             this.state.items.map((item) => {
@@ -197,17 +191,17 @@ class Products extends React.Component {
                 if(itemCategories.length > 0) {
                     itemMainCategoryId = itemCategories[0].id;
                 }
-                if(activeItemsCategories.indexOf(itemMainCategoryId) !== -1 ) {
-                    filteredAndOrderedItems.push(item);
+                if(this.state.activeItemsCategories.indexOf(itemMainCategoryId) !== -1 ) {
+                    filteredItems.push(item);
                 }
             })
         }
 
-        return filteredAndOrderedItems;
+        return filteredItems;
 
     };
 
-    reorderProducts = (items) => {
+    reorderItems = (items) => {
 
         const currentSort = this.state.sortPerPropertyOptions.find((option) => option.selected).value;
 
@@ -240,13 +234,10 @@ class Products extends React.Component {
             activeItemsCategories.push(filterId);
         }
 
-        let filteredAndOrderedItems = this.getFilteredProducts(activeItemsCategories);
-
         this.setState({
-            activeItemsCategories,
             currentOffset: 0,
-            filteredAndOrderedItems: this.reorderProducts(filteredAndOrderedItems)
-        })
+            activeItemsCategories
+        });
 
     };
 
@@ -262,7 +253,7 @@ class Products extends React.Component {
 
         this.setState({
             currentOffset: 0,
-            showPerPageOptions: newShowPerPageOptions
+            showPerPageOptions: newShowPerPageOptions,
         });
 
     };
@@ -270,7 +261,7 @@ class Products extends React.Component {
     handleClickSortOption = (sortPertPageOption) => {
 
         let newSortPerPropertyOptions = this.state.sortPerPropertyOptions;
-        let items = [...this.state.filteredAndOrderedItems];
+        let items = this.getFilteredItems()
 
         newSortPerPropertyOptions.map((newSortPerPropertyOption) => {
 
@@ -281,8 +272,7 @@ class Products extends React.Component {
         this.setState({
             currentOffset: 0,
             sortPerPropertyOptions : newSortPerPropertyOptions,
-            filteredAndOrderedItems: this.reorderProducts(items)
-        })
+        });
 
     };
 
@@ -322,18 +312,31 @@ class Products extends React.Component {
 
     };
 
-    render() {
+    getCurrentPageItems = () => {
 
-        const nbOfItemsPerPage = this.state.showPerPageOptions.find((option) => option.selected).value;
-        let currentPageItems = [];
+        let currentPageItems = this.getFilteredItems();
+        let sliceLimit = null;
+
+        this.reorderItems(currentPageItems);
 
         if(this.isLazyLoadActive) {
-            currentPageItems = this.state.filteredAndOrderedItems.slice(0, this.state.nbOfVisibleItemsLazyLoad);
+            sliceLimit = this.state.currentOffset + this.state.nbOfVisibleItemsLazyLoad;
         }
         else {
-            currentPageItems = this.state.filteredAndOrderedItems.slice(this.state.currentOffset, this.state.currentOffset + nbOfItemsPerPage);
+            sliceLimit = this.state.currentOffset + this.state.showPerPageOptions.find((option) => option.selected).value;
         }
-        console.log('render');
+
+        currentPageItems = currentPageItems.slice(this.state.currentOffset, sliceLimit);
+
+        return currentPageItems;
+
+    }
+
+
+    render() {
+
+        const currentPageItems = this.getCurrentPageItems();
+
         return (
             <div className="products component">
                 <div className="container">
@@ -389,17 +392,17 @@ class Products extends React.Component {
                             }
                             {currentPageItems.length > 0 &&
                                 <div className="js-items-list">
-                                    <ItemsList items={currentPageItems} />
+                                    <ItemsList items={this.getCurrentPageItems()} />
                                 </div>
                             }
-                            {(!this.isLazyLoadActive && this.state.filteredAndOrderedItems.length > nbOfItemsPerPage) &&
+                            {(!this.isLazyLoadActive && this.getFilteredItems().length > this.state.showPerPageOptions.find((option) => option.selected).value) &&
                                 <div className="products__pager-container">
                                     <Pager
                                         maxNbOfVisiblePagerItems={5}
                                         nbOfPagesSwitchToggle={3}
                                         currentOffset={this.state.currentOffset}
-                                        nbOfItems={this.state.filteredAndOrderedItems.length}
-                                        nbOfItemsPerPage={nbOfItemsPerPage}
+                                        nbOfItems={this.getFilteredItems().length}
+                                        nbOfItemsPerPage={this.state.showPerPageOptions.find((option) => option.selected).value}
                                         onClick={this.handleClickPager}
                                     />
                                 </div>
