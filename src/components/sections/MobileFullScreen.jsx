@@ -7,11 +7,10 @@ class MobileFullScreen extends React.Component {
     constructor(props) {
 
         super(props);
+
         this.state = {
             isVisible: false
         }
-
-        console.log('CONSTRUCTOR MOBILE FULL SCREEN');
 
     }
 
