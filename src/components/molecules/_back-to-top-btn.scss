@@ -1,0 +1,16 @@
+.back-to-top-btn {
+    position: fixed;
+    bottom: 5%;
+    right: 0;
+    border-radius: 5px 0 0 5px;
+    background-color: white;
+    border: solid 1px black;
+    border-right: 0;
+    color: black;
+    padding: 1em;
+    cursor: pointer;
+    transition: background-color 300ms;
+    &:hover {
+        background-color: #dedede;
+    }
+}

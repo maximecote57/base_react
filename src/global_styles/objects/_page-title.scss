@@ -1,3 +1,5 @@
 .page-title {
-    margin-bottom: 2em;
+    &__wrapper {
+        margin-bottom: 2em;
+    }
 }

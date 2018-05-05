@@ -1,22 +1,15 @@
-/*
+import React from 'react';
+import { FormattedMessage } from 'react-intl';
 
-    Options
-
-    hideFiltersWithNoItems (boolean)
-    Filters with no items in the list should be hidden
-
-    allowMultipleFilters (boolean)
-    Set to true to allow multiple filters at once
-
-
- */
-
-import React from "react";
-import { injectIntl, FormattedMessage } from 'react-intl';
+import ItemsList from "../sections/ItemsList";
+import FiltersList from "../sections/FiltersList";
 import Pager from "../sections/Pager";
-import Dropdown from "../sections/Dropdown"
+import { settings } from "../../SettingsContext";
+import Dropdown from "../molecules/Dropdown";
+import BackToTopBtn from "../molecules/BackToTopBtn"
 
 import {getDiffBetweenTwoDatesInMinutes} from "../tools/DateHelpers";
+import {orderAlphabeticallyAsc, orderAlphabeticallyDesc} from "../tools/SortHelpers";
 
 import "./_products.scss";
 
@@ -26,44 +19,22 @@ class Products extends React.Component {
 
         super();
 
-        this.isLazyLoadActive = false;
-        this.showFilters = true;
-        this.LazyLoadTriggerBottomOffset = 250;
-        this.hideFiltersWithNoItems = false;
-        this.allowMultipleFilters = true;
-        this.cacheTimeInMinutes = 60;
-        this.consumer_key = 'ck_d4eb559b025f8e28c9b5defc99fa7447fad93f53';
-        this.consumer_password = 'cs_2c1f842b775ad46c44ced6dbebea174e3068edc7';
-        this.baseApiURLProducts = 'https://adriengagnon.com/wp-json/wc/v2/products?per_page=100&consumer_key=' + this.consumer_key + "&consumer_secret=" + this.consumer_password;
-        this.baseApiURLProductsCategories = 'https://adriengagnon.com/wp-json/wc/v2/products/categories?consumer_key=' + this.consumer_key + "&consumer_secret=" + this.consumer_password + "&per_page=100";
-
-        this.productsContainer = null;
-        this.lazyLoadTriggerPosition = null;
+        this.isLazyLoadActive = true;
+        this.lazyLoadTriggerPosition = 0;
+        this.lazyLoadThreshold = 200;
+        this.itemsContainer = null;
+        this.showFilters = false;
 
         this.state = {
-            products: [],
-            filteredProducts: [],
-            productsCategories: [],
-            activeProductsCategories: [],
-            categoriesOfLoadedProducts: [],
-            areProductsLoading: false,
-            areProductsCategoriesLoading: false,
-            isFiltersMobileMenuVisible: false,
+            items: [],
+            itemsCategories: [],
+            filteredAndOrderedItems: [],
+            areItemsLoading: false,
+            areItemsCategoriesLoading: false,
+            activeItemsCategories: [],
             currentOffset: 0,
-            nbOfVisibleProductsLazyLoad: 20,
-            nbOfProductsPerPage: 12,
-            sortPerPropertyOptions: [
-                {
-                    text: "Name - A-Z",
-                    value: "alphabetical-asc",
-                    selected: true
-                },
-                {
-                    text: "Name - Z-A",
-                    value: "alphabetical-desc",
-                    selected: false
-                }
-            ],
+            isFiltersMobileMenuVisible: false,
+            nbOfVisibleItemsLazyLoad: 25,
             showPerPageOptions: [
                 {
                     text: "12 items per page",
@@ -80,7 +51,18 @@ class Products extends React.Component {
                     value: 48,
                     selected: false
                 }
-
+            ],
+            sortPerPropertyOptions: [
+                {
+                    text: "Name - A-Z",
+                    value: "alphabetical-asc",
+                    selected: true
+                },
+                {
+                    text: "Name - Z-A",
+                    value: "alphabetical-desc",
+                    selected: false
+                }
             ]
         }
 
@@ -96,55 +78,173 @@ class Products extends React.Component {
     componentDidUpdate = () => {
 
         if(this.isLazyLoadActive) {
-            this.lazyLoadTriggerPosition = (this.productsContainer.offsetTop + this.productsContainer.offsetHeight) - this.LazyLoadTriggerBottomOffset;
+            if(!this.itemsContainer) {
+                this.itemsContainer = document.querySelector('.js-items-list');
+                document.addEventListener('scroll', this.handleScroll);
+            }
+            else {
+                this.lazyLoadTriggerPosition = (this.itemsContainer.offsetTop + this.itemsContainer.offsetHeight) - this.lazyLoadThreshold;
+            }
         }
 
     };
 
-    handleScroll = (e) => {
+    getProductsFromLocalStorage = () => {
 
-        if((window.scrollY + window.innerHeight) >= this.lazyLoadTriggerPosition) {
-            this.setState({
-                nbOfVisibleProductsLazyLoad: this.state.nbOfVisibleProductsLazyLoad + (this.state.showPerPageOptions.find((option) => option.selected).value)
-            });
+        const localStorageProductsObject = JSON.parse(localStorage.getItem('base_react_products'));
+        let localStorageProducts = null;
+
+        if(localStorageProductsObject) {
+            const localStorageProductsTimestamp = localStorageProductsObject.timestamp;
+            if(localStorageProductsTimestamp) {
+                const diffInMinutesCachedProducts = getDiffBetweenTwoDatesInMinutes(new Date(localStorageProductsTimestamp), new Date());
+                if(diffInMinutesCachedProducts !== null && diffInMinutesCachedProducts < settings.cacheTimeInMinutes) {
+                    localStorageProducts = localStorageProductsObject.data;
+                }
+            }
         }
+
+        return localStorageProducts
+
+    };
+
+    getProductsFromAPI = () => {
+
+        return fetch(settings.apiUrlProducts)
+            .then((response) => response.json());
+
+    }
+
+    getProducts = () => {
+
+        let productsFromLocalStorage = this.getProductsFromLocalStorage();
+
+        if(productsFromLocalStorage) {
+
+            this.reorderProducts(productsFromLocalStorage);
+
+            this.setState({
+                items: productsFromLocalStorage,
+                filteredAndOrderedItems: productsFromLocalStorage
+            });
+
+        }
+        else {
+
+            this.setState({
+                areItemsLoading: true
+            });
+
+            this.getProductsFromAPI().then((items) => {
+
+                localStorage.setItem('base_react_products', JSON.stringify({data: [...items], timestamp: new Date()}));
+
+                this.reorderProducts(items);
+
+                this.setState({
+                    items,
+                    filteredAndOrderedItems: items,
+                    areItemsLoading: false
+                })
+            })
+
+        }
+
+    };
+
+    getProductsCategories = () => {
+
+        if(localStorage.getItem('base_react_products_categories')) {
+            const itemsCategoriesFromLocalStorage = JSON.parse(localStorage.getItem('base_react_products_categories'));
+            this.setState({
+                itemsCategories: itemsCategoriesFromLocalStorage
+            })
+        }
+        else {
+
+            this.setState({
+                areItemsCategoriesLoading: true
+            });
+
+            fetch(this.props.itemsCategoriesUrl)
+                .then(response => response.json())
+                .then((itemsCategories) => {
+
+                        localStorage.setItem('base_react_products_categories', JSON.stringify(itemsCategories));
+                        this.setState({
+                            itemsCategories,
+                            areItemsCategoriesLoading: false
+                        })
+                    }
+                )
+        }
+
+    };
+
+    getFilteredProducts = (activeItemsCategories) => {
+
+        let filteredAndOrderedItems = [];
+
+        if(activeItemsCategories.length === 0) {
+            filteredAndOrderedItems = this.state.items;
+        }
+        else if(this.state.items.length > 0) {
+            this.state.items.map((item) => {
+                const itemCategories = item.categories;
+                let itemMainCategoryId = null;
+                if(itemCategories.length > 0) {
+                    itemMainCategoryId = itemCategories[0].id;
+                }
+                if(activeItemsCategories.indexOf(itemMainCategoryId) !== -1 ) {
+                    filteredAndOrderedItems.push(item);
+                }
+            })
+        }
+
+        return filteredAndOrderedItems;
+
+    };
+
+    reorderProducts = (items) => {
+
+        const currentSort = this.state.sortPerPropertyOptions.find((option) => option.selected).value;
+
+        if(currentSort === "alphabetical-asc") {
+
+            orderAlphabeticallyAsc(items);
+        }
+        else if(currentSort === "alphabetical-desc") {
+
+            orderAlphabeticallyDesc(items);
+
+        }
+
+        return items;
 
     };
 
     handleClickFilter = (filterId) => {
 
-        let activeProductsCategories = this.state.activeProductsCategories;
-        const indexOfFilterId = activeProductsCategories.indexOf(filterId);
+        let activeItemsCategories = this.state.activeItemsCategories;
+        const indexOfFilterId = activeItemsCategories.indexOf(filterId);
 
         if(indexOfFilterId !== -1) {
-            activeProductsCategories.splice(indexOfFilterId, 1);
+            activeItemsCategories.splice(indexOfFilterId, 1);
         }
         else {
-            if(!this.allowMultipleFilters) {
-                activeProductsCategories = [];
+            if(!this.state.allowMultipleFilters) {
+                activeItemsCategories = [];
             }
-            activeProductsCategories.push(filterId);
+            activeItemsCategories.push(filterId);
         }
 
-        let filteredProducts = this.getFilteredProducts(activeProductsCategories);
-
-        this.reorderProducts(filteredProducts);
+        let filteredAndOrderedItems = this.getFilteredProducts(activeItemsCategories);
 
         this.setState({
-            activeProductsCategories,
+            activeItemsCategories,
             currentOffset: 0,
-            filteredProducts
+            filteredAndOrderedItems: this.reorderProducts(filteredAndOrderedItems)
         })
-
-    };
-
-    handleClickPager = (newCurrentPage) => {
-
-        this.setState({
-            currentOffset: (newCurrentPage - 1) * (this.state.showPerPageOptions.find((option) => option.selected).value)
-        });
-
-        window.scrollTo(0, 0);
 
     };
 
@@ -168,7 +268,7 @@ class Products extends React.Component {
     handleClickSortOption = (sortPertPageOption) => {
 
         let newSortPerPropertyOptions = this.state.sortPerPropertyOptions;
-        let products = [...this.state.filteredProducts];
+        let items = [...this.state.filteredAndOrderedItems];
 
         newSortPerPropertyOptions.map((newSortPerPropertyOption) => {
 
@@ -176,13 +276,31 @@ class Products extends React.Component {
 
         });
 
-        this.reorderProducts(products);
-
         this.setState({
             currentOffset: 0,
             sortPerPropertyOptions : newSortPerPropertyOptions,
-            filteredProducts: products
+            filteredAndOrderedItems: this.reorderProducts(items)
         })
+
+    };
+
+    handleScroll = () => {
+
+        if((window.scrollY + window.innerHeight) >= this.lazyLoadTriggerPosition) {
+            this.setState({
+                nbOfVisibleItemsLazyLoad: this.state.nbOfVisibleItemsLazyLoad + (this.state.showPerPageOptions.find((option) => option.selected).value)
+            });
+        }
+
+    };
+
+    handleClickPager = (newCurrentPage) => {
+
+        this.setState({
+            currentOffset: (newCurrentPage - 1) * (this.state.showPerPageOptions.find((option) => option.selected).value)
+        });
+
+        window.scrollTo(0, 0);
 
     };
 
@@ -202,187 +320,23 @@ class Products extends React.Component {
 
     };
 
-    reorderProducts = (products) => {
-
-        const currentSort = this.state.sortPerPropertyOptions.find((option) => option.selected).value;
-        let compareFunction = null;
-
-        if(currentSort === "alphabetical-asc") {
-
-            compareFunction = (a, b) => {
-
-                if(a.name < b.name) return -1;
-                if(a.name > b.name) return 1;
-                return 0;
-
-            }
-        }
-        else if(currentSort === "alphabetical-desc") {
-
-            compareFunction = (a, b) => {
-
-                if(a.name < b.name) return 1;
-                if(a.name > b.name) return -1;
-                return 0;
-
-            }
-
-        }
-
-        products.sort(compareFunction);
-
-    }
-
-    getCategoriesOfLoadedProducts = (products) => {
-
-        let categoriesInProducts = [];
-
-        products.map((product) => {
-            if(product.categories && product.categories.length > 0) {
-                categoriesInProducts.push(product.categories[0].id)
-            }
-        });
-
-        return [...(new Set(categoriesInProducts))];
-
-    };
-
-    getProductsCategories = () => {
-
-        if(localStorage.getItem('base_react_products_categories')) {
-            const productsCategoriesFromLocalStorage = JSON.parse(localStorage.getItem('base_react_products_categories'));
-            this.setState({
-                productsCategories: productsCategoriesFromLocalStorage
-            })
-        }
-        else {
-
-            this.setState({
-                areProductsCategoriesLoading: true
-            });
-
-            fetch(this.baseApiURLProductsCategories)
-                .then(response => response.json())
-                .then((productsCategories) => {
-
-                        localStorage.setItem('base_react_products_categories', JSON.stringify(productsCategories));
-                        this.setState({
-                            productsCategories,
-                            areProductsCategoriesLoading: false
-                        })
-                    }
-                )
-        }
-
-    };
-
-    getProducts = () => {
-
-        let localStorageProductsObject = JSON.parse(localStorage.getItem('base_react_products'));
-        let localStorageProducts = null;
-        let localStorageProductsTimestamp = null;
-        let diffInMinutesCachedProducts = null;
-
-        if(localStorageProductsObject) {
-            localStorageProducts = localStorageProductsObject.data;
-            localStorageProductsTimestamp = localStorageProductsObject.timestamp;
-            if(localStorageProductsTimestamp) {
-                diffInMinutesCachedProducts = getDiffBetweenTwoDatesInMinutes(new Date(localStorageProductsTimestamp), new Date());
-            }
-        }
-        if(diffInMinutesCachedProducts !== null && diffInMinutesCachedProducts < this.cacheTimeInMinutes) {
-
-            if(this.isLazyLoadActive) {
-                document.addEventListener('scroll', this.handleScroll);
-            }
-
-            this.reorderProducts(localStorageProducts);
-
-            this.setState({
-                products: localStorageProducts,
-                filteredProducts: localStorageProducts,
-                categoriesOfLoadedProducts : this.getCategoriesOfLoadedProducts(localStorageProducts)
-            });
-        }
-        else {
-
-            this.setState({
-                areProductsLoading: true
-            });
-
-            fetch(this.baseApiURLProducts)
-                .then((response) => response.json())
-                .then((products) => {
-
-                        if(this.isLazyLoadActive) {
-                            document.addEventListener('scroll', this.handleScroll);
-                        }
-
-                        localStorage.setItem('base_react_products', JSON.stringify({data: [...products], timestamp: new Date()}));
-
-                        this.reorderProducts(products);
-
-                        this.setState({
-                            products: products,
-                            filteredProducts: products,
-                            categoriesOfLoadedProducts : this.getCategoriesOfLoadedProducts(products),
-                            areProductsLoading: false
-                        })
-
-                    }
-                )
-        }
-
-    };
-
-    getFilteredProducts = (activeProductsCategories) => {
-
-        let filteredProducts = [];
-
-        if(activeProductsCategories.length === 0) {
-            filteredProducts = this.state.products;
-        }
-        else if(this.state.products.length > 0) {
-            this.state.products.map((product) => {
-                const productCategories = product.categories;
-                let productMainCategoryId = null;
-                if(productCategories.length > 0) {
-                    productMainCategoryId = productCategories[0].id;
-                }
-                if(activeProductsCategories.indexOf(productMainCategoryId) !== -1 ) {
-                    filteredProducts.push(product);
-                }
-            })
-        }
-
-        return filteredProducts;
-
-    };
-
     render() {
 
-        const productsCategories = this.state.productsCategories;
-        const activeProductsCategories = this.state.activeProductsCategories;
-        const categoriesOfLoadedProducts = this.state.categoriesOfLoadedProducts;
-        const areProductsLoading = this.state.areProductsLoading;
-        const areProductsCategoriesLoading = this.state.areProductsCategoriesLoading;
-        const filteredProducts = this.state.filteredProducts;
-        const isLadyLoadActive = this.isLazyLoadActive;
-        const nbOfProductsPerPage = this.state.showPerPageOptions.find((option) => option.selected).value;
-        let currentPageProducts = null;
+        const nbOfItemsPerPage = this.state.showPerPageOptions.find((option) => option.selected).value;
+        let currentPageItems = [];
 
         if(this.isLazyLoadActive) {
-            currentPageProducts = filteredProducts.slice(0, this.state.nbOfVisibleProductsLazyLoad);
+            currentPageItems = this.state.filteredAndOrderedItems.slice(0, this.state.nbOfVisibleItemsLazyLoad);
         }
         else {
-            currentPageProducts = filteredProducts.slice(this.state.currentOffset, this.state.currentOffset + nbOfProductsPerPage);
+            currentPageItems = this.state.filteredAndOrderedItems.slice(this.state.currentOffset, this.state.currentOffset + nbOfItemsPerPage);
         }
-
+        console.log('render');
         return (
-            <div className="products component full-height">
+            <div className="products component">
                 <div className="container">
-                    <div className="page-title">
-                        <h1>
+                    <div className="page-title__wrapper">
+                        <h1 className="page-title">
                             <FormattedMessage id="products.title" default="Products"/>
                         </h1>
                     </div>
@@ -392,98 +346,67 @@ class Products extends React.Component {
                         </p>
                     </div>
                     <div className="products__container">
-                        {(this.showFilters && (window.innerWidth < 768 ? this.state.isFiltersMobileMenuVisible : true)) &&
-                            <div className="products__filters-container">
-                                <div className="products__filters-close-btn" onClick={this.handleClickCloseFilters}>
-                                    <i className="fas fa-times"></i>
-                                </div>
-                                <h2 className="products__filters-title"><FormattedMessage id="generic.filters" default="Filters"/></h2>
-                                {(productsCategories.length === 0 && areProductsCategoriesLoading) &&
-                                    <div><FormattedMessage id="products.loading-products-categories" default="Loading products categories"/></div>
-                                }
-                                {(productsCategories.length === 0 && !areProductsCategoriesLoading) &&
-                                    <div><FormattedMessage id="products.no-products-categories" default="No products categories."/></div>
-                                }
-                                {(productsCategories && productsCategories.length > 0) &&
-                                    productsCategories.map((productsCategory) => {
-
-                                        let showFilter = true;
-
-                                        if (this.hideFiltersWithNoItems) {
-                                            if (currentPageProducts.length !== 0) {
-                                                if (categoriesOfLoadedProducts.length > 0) {
-                                                    if (categoriesOfLoadedProducts.indexOf(productsCategory.id) === -1) {
-                                                        showFilter = false;
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        if (showFilter) {
-                                            return (
-                                                <div className={"products__filters-item " + (activeProductsCategories.indexOf(productsCategory.id) !== -1 ? 'is-active' : '')} key={productsCategory.id} onClick={this.handleClickFilter.bind(this, productsCategory.id)}>
-                                                    <h3>{productsCategory.name}</h3>
-                                                </div>
-                                            )
-                                        }
-                                    })
-                                }
+                        {(this.state.itemsCategories.length > 0 && this.showFilters) &&
+                            <div className="products__sidebar">
+                                <FiltersList
+                                    filters={this.state.itemsCategories}
+                                    activeFilters={this.state.activeItemsCategories}
+                                    onClick={this.handleClickFilter}
+                                    onClickCloseBtn={this.handleClickCloseFilters}
+                                    title="Filters"
+                                />
                             </div>
                         }
-                        <div className="products__products-container">
-                            <div className="products__filters-bar">
+                        <div className="products__list-container">
+                            <div className="products__dropdowns-container">
                                 {window.innerWidth < 768 &&
-                                <div className="products__filters-bar-link">
-                                    <a href="javascript:void(0)" onClick={this.handleClickOpenFilters}>View Filters</a>
-                                </div>
+                                    <div className="products__dropdown-wrapper">
+                                        <a href="javascript:void(0)" onClick={this.handleClickOpenFilters}>
+                                            <FormattedMessage id="generic.filters" default="Filters"/>
+                                        </a>
+                                    </div>
                                 }
                                 {!this.isLazyLoadActive &&
-                                    <div className="products__filters-bar-dropdown">
+                                    <div className="products__dropdown-wrapper">
                                         <Dropdown items={this.state.showPerPageOptions} onClickItem={this.handleClickShowPerPageOption}/>
                                     </div>
                                 }
-                                <div className="products__filters-bar-dropdown">
+                                <div className="products__dropdown-wrapper">
                                     <Dropdown items={this.state.sortPerPropertyOptions} onClickItem={this.handleClickSortOption}/>
                                 </div>
                             </div>
-                            <div ref={(productsContainer) => this.productsContainer = productsContainer}>
-                                <div className="products__products-row">
-                                    {(currentPageProducts.length > 0) &&
-                                        currentPageProducts.map((product) => {
-                                            return (
-                                                <div className="products__products-row-item" key={product.id}>
-                                                    <div className="products__product-container">
-                                                        <img className="products__product-img" src={product.images[0].src}/>
-                                                        <h3 className="products__product-title">{product.name}</h3>
-                                                    </div>
-                                                </div>
-                                            )
-                                        })
-                                    }
+                            {(currentPageItems.length === 0 && !this.state.areItemsLoading) &&
+                                <FormattedMessage id="products.no-products" default="No products"/>
+                            }
+                            {(currentPageItems.length === 0 && this.state.areItemsLoading) &&
+                                <FormattedMessage id="products.loading-products" default="Loading products..."/>
+                            }
+                            {currentPageItems.length > 0 &&
+                                <div className="js-items-list">
+                                    <ItemsList items={currentPageItems} />
                                 </div>
-                                {areProductsLoading &&
-                                    <div className="products__loader">
-                                        <FormattedMessage id="products.loading-products" default="Loading products..."/>
-                                    </div>
-                                }
-                                {!areProductsLoading && currentPageProducts.length === 0 &&
-                                    <div>
-                                        <FormattedMessage id="products.no-products" default="No products"/>
-                                    </div>
-                                }
-                            </div>
-                            <div>
-                                {(!isLadyLoadActive && currentPageProducts.length > 0 && Math.round(filteredProducts.length / nbOfProductsPerPage) > 1) &&
-                                    <Pager currentOffset={this.state.currentOffset} nbOfItems={filteredProducts.length} nbOfProductsPerPage={nbOfProductsPerPage} onClick={this.handleClickPager}/>
-                                }
-                            </div>
+                            }
+                            {(!this.isLazyLoadActive && this.state.filteredAndOrderedItems.length > nbOfItemsPerPage) &&
+                                <div className="products__pager-container">
+                                    <Pager
+                                        maxNbOfVisiblePagerItems={5}
+                                        nbOfPagesSwitchToggle={3}
+                                        currentOffset={this.state.currentOffset}
+                                        nbOfItems={this.state.filteredAndOrderedItems.length}
+                                        nbOfItemsPerPage={nbOfItemsPerPage}
+                                        onClick={this.handleClickPager}
+                                    />
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
+                <BackToTopBtn />
             </div>
         );
-
     }
+
 }
 
-export default injectIntl(Products);
+
+export default Products;
