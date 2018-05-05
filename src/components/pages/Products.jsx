@@ -6,7 +6,8 @@ import FiltersList from "../sections/FiltersList";
 import Pager from "../sections/Pager";
 import { settings } from "../../SettingsContext";
 import Dropdown from "../molecules/Dropdown";
-import BackToTopBtn from "../molecules/BackToTopBtn"
+import BackToTopBtn from "../molecules/BackToTopBtn";
+import MobileFullScreen from "../sections/MobileFullScreen";
 
 import {getDiffBetweenTwoDatesInMinutes} from "../tools/DateHelpers";
 import {orderAlphabeticallyAsc, orderAlphabeticallyDesc} from "../tools/SortHelpers";
@@ -19,11 +20,12 @@ class Products extends React.Component {
 
         super();
 
-        this.isLazyLoadActive = true;
-        this.lazyLoadTriggerPosition = 0;
+        this.isLazyLoadActive = false;
         this.lazyLoadThreshold = 200;
+        this.lazyLoadTriggerPosition = 0;
+        this.showFilters = true;
+        this.allowMultipleFilters = true;
         this.itemsContainer = null;
-        this.showFilters = false;
 
         this.state = {
             items: [],
@@ -232,7 +234,7 @@ class Products extends React.Component {
             activeItemsCategories.splice(indexOfFilterId, 1);
         }
         else {
-            if(!this.state.allowMultipleFilters) {
+            if(!this.allowMultipleFilters) {
                 activeItemsCategories = [];
             }
             activeItemsCategories.push(filterId);
@@ -346,32 +348,36 @@ class Products extends React.Component {
                         </p>
                     </div>
                     <div className="products__container">
-                        {(this.state.itemsCategories.length > 0 && this.showFilters) &&
+                        {(this.state.itemsCategories.length > 0 && this.showFilters && window.innerWidth >= 768) &&
                             <div className="products__sidebar">
                                 <FiltersList
                                     filters={this.state.itemsCategories}
                                     activeFilters={this.state.activeItemsCategories}
                                     onClick={this.handleClickFilter}
-                                    onClickCloseBtn={this.handleClickCloseFilters}
                                     title="Filters"
                                 />
                             </div>
                         }
                         <div className="products__list-container">
-                            <div className="products__dropdowns-container">
-                                {window.innerWidth < 768 &&
-                                    <div className="products__dropdown-wrapper">
-                                        <a href="javascript:void(0)" onClick={this.handleClickOpenFilters}>
-                                            <FormattedMessage id="generic.filters" default="Filters"/>
-                                        </a>
+                            <div className="products__widgets-container">
+                                {(this.state.itemsCategories.length > 0 && this.showFilters && window.innerWidth < 768) &&
+                                    <div className="products__widget-wrapper">
+                                        <MobileFullScreen triggerTitle="Show filters">
+                                            <FiltersList
+                                                filters={this.state.itemsCategories}
+                                                activeFilters={this.state.activeItemsCategories}
+                                                onClick={this.handleClickFilter}
+                                                title="Filters"
+                                            />
+                                        </MobileFullScreen>
                                     </div>
                                 }
                                 {!this.isLazyLoadActive &&
-                                    <div className="products__dropdown-wrapper">
+                                    <div className="products__widget-wrapper">
                                         <Dropdown items={this.state.showPerPageOptions} onClickItem={this.handleClickShowPerPageOption}/>
                                     </div>
                                 }
-                                <div className="products__dropdown-wrapper">
+                                <div className="products__widget-wrapper">
                                     <Dropdown items={this.state.sortPerPropertyOptions} onClickItem={this.handleClickSortOption}/>
                                 </div>
                             </div>
@@ -405,7 +411,6 @@ class Products extends React.Component {
             </div>
         );
     }
-
 }
 
 

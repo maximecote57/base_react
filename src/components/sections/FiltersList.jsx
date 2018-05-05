@@ -20,9 +20,6 @@ const FiltersList = (props) => {
 
     return (
         <div className="filters-list">
-            <div className="filters-list__close-btn" onClick={props.onClickCloseBtn}>
-                <i className="fas fa-times"></i>
-            </div>
             <h2 className="filters-list__title">{props.title}</h2>
             { props.filters.map((filter) => {
                 return (

@@ -30,14 +30,4 @@
             font-weight: bold;
         }
     }
-    &__close-btn {
-        position: absolute;
-        top: 1em;
-        right: 1em;
-        font-size: 2em;
-        cursor: pointer;
-        @media screen and (min-width: 768px) {
-            display: none;
-        }
-    }
 }

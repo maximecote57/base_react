@@ -33,14 +33,17 @@
         flex: 1;
         padding: 0 1.5em;
     }
-    &__dropdowns-container {
+    &__widgets-container {
         display: flex;
         align-items: center;
         justify-content: flex-end;
+        flex-wrap: wrap;
         padding-bottom: 2em;
     }
-    &__dropdown-wrapper {
-        width: 10em;
+    &__widget-wrapper {
+        @media (min-width: 768px) {
+            width: 10em;
+        }
         & + #{&} {
             margin-left: 1em;
         }
