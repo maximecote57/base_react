@@ -59,7 +59,7 @@ module.exports = {
     ],
     devServer: {
         contentBase: './dist',
-        hot: true,
+        hot: false,
         historyApiFallback: true,
         disableHostCheck: true
     }
