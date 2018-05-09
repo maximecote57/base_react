@@ -1,32 +1,32 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
+import { connect } from "react-redux";
+import { fetchProducts, updateProductsOffset, updateNbOfVisibleProductsInLazyLoadMode, updateNbOfProductsPerPage, updateSortMode } from "../../actions/productsActions";
+import { fetchProductsCategories, toggleProductCategory } from "../../actions/productCategoriesActions";
 
 import ItemsList from "../sections/ItemsList";
 import FiltersList from "../sections/FiltersList";
 import Pager from "../sections/Pager";
-import { settings } from "../../SettingsContext";
 import Dropdown from "../molecules/Dropdown";
 import BackToTopBtn from "../molecules/BackToTopBtn";
 import MobileFullScreen from "../sections/MobileFullScreen";
 
-import {getDiffBetweenTwoDatesInMinutes} from "../tools/DateHelpers";
 import {orderAlphabeticallyAsc, orderAlphabeticallyDesc} from "../tools/SortHelpers";
 
 import "./_products.scss";
 
 class Products extends React.Component {
 
-    constructor() {
+    constructor(props) {
 
-        super();
+        super(props);
 
         this.isLazyLoadActive = false;
         this.lazyLoadThreshold = 200;
         this.lazyLoadTriggerPosition = 0;
         this.showFilters = true;
-        this.allowMultipleFilters = true;
         this.itemsContainer = null;
-        this.showPerPageOptions = [
+        this.nbOfProductsPerPageOptions = [
             {
                 text: "12 items per page",
                 value: 12
@@ -40,7 +40,7 @@ class Products extends React.Component {
                 value: 48
             }
         ];
-        this.sortPerPropertyOptions = [
+        this.sortModeOptions = [
             {
                 text: "Name - A-Z",
                 value: "alphabetical-asc"
@@ -51,26 +51,12 @@ class Products extends React.Component {
             }
         ];
 
-        this.state = {
-            items: [],
-            itemsCategories: [],
-            currentPageItems: [],
-            areItemsLoading: false,
-            areItemsCategoriesLoading: false,
-            activeItemsCategories: [],
-            currentOffset: 0,
-            isFiltersMobileMenuVisible: false,
-            nbOfVisibleItemsLazyLoad: 25,
-            showPerPage: 12,
-            sortPerProperty: "alphabetical-asc"
-        }
-
     }
 
     componentDidMount = () => {
 
-        this.getItems();
-        this.getItemsCategories();
+        this.props.fetchProducts();
+        this.props.fetchProductsCategories();
 
     };
 
@@ -88,107 +74,22 @@ class Products extends React.Component {
 
     };
 
-    getItemsFromLocalStorage = () => {
-
-        const localStorageItemsObject = JSON.parse(localStorage.getItem('base_react_products'));
-        let localStorageItems = null;
-
-        if(localStorageItemsObject) {
-            const localStorageItemsTimestamp = localStorageItemsObject.timestamp;
-            if(localStorageItemsTimestamp) {
-                const diffInMinutesCachedProducts = getDiffBetweenTwoDatesInMinutes(new Date(localStorageItemsTimestamp), new Date());
-                if(diffInMinutesCachedProducts !== null && diffInMinutesCachedProducts < settings.cacheTimeInMinutes) {
-                    localStorageItems = localStorageItemsObject.data;
-                }
-            }
-        }
-
-        return localStorageItems
-
-    };
-
-    getItemsFromAPI = () => {
-
-        return fetch(settings.apiUrlProducts)
-            .then((response) => response.json());
-
-    }
-
-    getItems = () => {
-
-        let itemsFromLocalStorage = this.getItemsFromLocalStorage();
-
-        if(itemsFromLocalStorage) {
-
-            this.setState({
-                items: itemsFromLocalStorage
-            });
-
-        }
-        else {
-
-            this.setState({
-                areItemsLoading: true
-            });
-
-            this.getItemsFromAPI().then((itemsFromAPI) => {
-
-                localStorage.setItem('base_react_products', JSON.stringify({data: [...itemsFromAPI], timestamp: new Date()}));
-
-                this.setState({
-                    items: itemsFromAPI,
-                    areItemsLoading: false
-                });
-            })
-
-        }
-
-    };
-
-    getItemsCategories = () => {
-
-        if(localStorage.getItem('base_react_products_categories')) {
-            const itemsCategoriesFromLocalStorage = JSON.parse(localStorage.getItem('base_react_products_categories'));
-            this.setState({
-                itemsCategories: itemsCategoriesFromLocalStorage
-            })
-        }
-        else {
-
-            this.setState({
-                areItemsCategoriesLoading: true
-            });
-
-            fetch(this.props.itemsCategoriesUrl)
-                .then(response => response.json())
-                .then((itemsCategories) => {
-
-                        localStorage.setItem('base_react_products_categories', JSON.stringify(itemsCategories));
-                        this.setState({
-                            itemsCategories,
-                            areItemsCategoriesLoading: false
-                        })
-                    }
-                )
-        }
-
-    };
 
     getFilteredItems = () => {
 
         let filteredItems = [];
 
-        if(this.state.activeItemsCategories.length === 0) {
-            filteredItems = this.state.items;
+        if(this.props.activeItemsCategories.length === 0) {
+            filteredItems = this.props.items;
         }
-        else if(this.state.items.length > 0) {
-            this.state.items.map((item) => {
+        else if(this.props.items.length > 0) {
+            this.props.items.map((item) => {
                 const itemCategories = item.categories;
                 let itemMainCategoryId = null;
                 if(itemCategories.length > 0) {
                     itemMainCategoryId = itemCategories[0].id;
                 }
-                if(this.state.activeItemsCategories.indexOf(itemMainCategoryId) !== -1 ) {
+                if(this.props.activeItemsCategories.indexOf(itemMainCategoryId) !== -1 ) {
                     filteredItems.push(item);
                 }
             })
@@ -200,7 +101,7 @@ class Products extends React.Component {
 
     reorderItems = (items) => {
 
-        const currentSort = this.state.sortPerProperty;
+        const currentSort = this.props.sortMode;
 
         if(currentSort === "alphabetical-asc") {
 
@@ -218,105 +119,84 @@ class Products extends React.Component {
 
     handleClickFilter = (filterId) => {
 
-        let activeItemsCategories = this.state.activeItemsCategories;
-        const indexOfFilterId = activeItemsCategories.indexOf(filterId);
+        this.props.toggleProductCategory(filterId);
 
-        if(indexOfFilterId !== -1) {
-            activeItemsCategories.splice(indexOfFilterId, 1);
-        }
-        else {
-            if(!this.allowMultipleFilters) {
-                activeItemsCategories = [];
-            }
-            activeItemsCategories.push(filterId);
-        }
-
-        this.setState({
-            currentOffset: 0,
-            activeItemsCategories
-        });
+        this.props.updateProductsOffset(0);
 
     };
 
-    handleClickShowPerPageOption = (showPerPageOption) => {
+    handleClickShowPerPageOption = (nbOfProductsPerPageOption) => {
 
-        this.setState({
-            currentOffset: 0,
-            showPerPage: showPerPageOption
-        });
+        this.props.updateProductsOffset(0);
+        this.props.updateNbOfProductsPerPage(nbOfProductsPerPageOption);
 
     };
 
     handleClickSortOption = (sortPerPageOption) => {
 
-        this.setState({
-            currentOffset: 0,
-            sortPerProperty : sortPerPageOption
-        });
+        this.props.updateProductsOffset(0);
+        this.props.updateSortMode(sortPerPageOption);
 
     };
 
     handleScroll = () => {
 
         if((window.scrollY + window.innerHeight) >= this.lazyLoadTriggerPosition) {
-            this.setState({
-                nbOfVisibleItemsLazyLoad: this.state.nbOfVisibleItemsLazyLoad + (this.state.showPerPageOptions.find((option) => option.selected).value)
-            });
+            this.props.updateNbOfVisibleProductsInLazyLoadMode();
         }
 
     };
 
     handleClickPager = (newCurrentPage) => {
 
-        this.setState({
-            currentOffset: (newCurrentPage - 1) * this.state.showPerPage
-        });
+        this.props.updateProductsOffset((newCurrentPage - 1) * this.props.nbOfProductsPerPage);
 
         window.scrollTo(0, 0);
-
-    };
-
-    handleClickCloseFilters = () => {
-
-        this.setState({
-            isFiltersMobileMenuVisible: false
-        });
-
-    };
-
-    handleClickOpenFilters = () => {
-
-        this.setState({
-            isFiltersMobileMenuVisible: true
-        });
 
     };
 
     getCurrentPageItems = () => {
 
         let currentPageItems = this.getFilteredItems();
-        let sliceLimit = this.state.currentOffset;
+        let sliceLimit = this.props.offset;
 
         this.reorderItems(currentPageItems);
 
-        if(this.isLazyLoadActive) {
-            sliceLimit += this.state.nbOfVisibleItemsLazyLoad;
-        }
-        else {
-            sliceLimit += (this.state.currentOffset + this.state.showPerPage);
-        }
+        sliceLimit += (this.isLazyLoadActive ? this.props.nbOfVisibleItemsLazyLoad : this.props.nbOfProductsPerPage)
 
-        currentPageItems = currentPageItems.slice(this.state.currentOffset, sliceLimit);
+        currentPageItems = currentPageItems.slice(this.props.offset, sliceLimit);
 
         return currentPageItems;
 
-    }
+    };
 
 
     render() {
 
-        const currentPageItems = this.getCurrentPageItems();
-        const nbOfFilteredItems = this.getFilteredItems().length;
+        const filteredItems = this.getFilteredItems();
+        const nbOfFilteredItems = filteredItems.length;
+        let itemsDiv = null;
+        let itemsCategoriesDiv = null;
+
+        if(this.props.areItemsFetching) {
+            itemsDiv = <FormattedMessage id="products.loading-products" default="Loading products..."/>;
+        }
+        else if(this.props.itemsError) {
+            itemsDiv = <div>{this.props.itemsError.message}</div>
+        }
+        else if (nbOfFilteredItems === 0) {
+            itemsDiv = <FormattedMessage id="products.no-products" default="No products"/>
+        }
+        else {
+            itemsDiv = <div className="js-items-list"><ItemsList items={this.getCurrentPageItems()} /></div>
+        }
+
+        if(this.props.areItemsCategoriesFetching) {
+            itemsCategoriesDiv = <FormattedMessage id="products.loading-products-categories" default="Loading products categories..."/>;
+        }
+        else if (this.showFilters && this.props.itemsCategories.length > 0) {
+            itemsCategoriesDiv = <FiltersList filters={this.props.itemsCategories} activeFilters={this.props.activeItemsCategories} onClick={this.handleClickFilter} title="Filters"/>
+        }
 
         return (
             <div className="products component">
@@ -332,58 +212,38 @@ class Products extends React.Component {
                         </p>
                     </div>
                     <div className="products__container">
-                        {(this.state.itemsCategories.length > 0 && this.showFilters && window.innerWidth >= 768) &&
+                        {(window.innerWidth >= 768 && itemsCategoriesDiv) &&
                             <div className="products__sidebar">
-                                <FiltersList
-                                    filters={this.state.itemsCategories}
-                                    activeFilters={this.state.activeItemsCategories}
-                                    onClick={this.handleClickFilter}
-                                    title="Filters"
-                                />
+                                {itemsCategoriesDiv}
                             </div>
                         }
                         <div className="products__list-container">
                             <div className="products__widgets-container">
-                                {(this.state.itemsCategories.length > 0 && this.showFilters && window.innerWidth < 768) &&
+                                {(window.innerWidth < 768 && itemsCategoriesDiv) &&
                                     <div className="products__widget-wrapper">
                                         <MobileFullScreen triggerTitle="Show filters">
-                                            <FiltersList
-                                                filters={this.state.itemsCategories}
-                                                activeFilters={this.state.activeItemsCategories}
-                                                onClick={this.handleClickFilter}
-                                                title="Filters"
-                                            />
+                                            {itemsCategoriesDiv}
                                         </MobileFullScreen>
                                     </div>
                                 }
                                 {!this.isLazyLoadActive &&
                                     <div className="products__widget-wrapper">
-                                        <Dropdown title="Items per Page" items={this.showPerPageOptions} onClickItem={this.handleClickShowPerPageOption}/>
+                                        <Dropdown title="Items per Page" items={this.nbOfProductsPerPageOptions} onClickItem={this.handleClickShowPerPageOption}/>
                                     </div>
                                 }
                                 <div className="products__widget-wrapper">
-                                    <Dropdown title="Sort Order" items={this.sortPerPropertyOptions} onClickItem={this.handleClickSortOption}/>
+                                    <Dropdown title="Sort Order" items={this.sortModeOptions} onClickItem={this.handleClickSortOption}/>
                                 </div>
                             </div>
-                            {(currentPageItems.length === 0 && !this.state.areItemsLoading) &&
-                                <FormattedMessage id="products.no-products" default="No products"/>
-                            }
-                            {(currentPageItems.length === 0 && this.state.areItemsLoading) &&
-                                <FormattedMessage id="products.loading-products" default="Loading products..."/>
-                            }
-                            {currentPageItems.length > 0 &&
-                                <div className="js-items-list">
-                                    <ItemsList items={this.getCurrentPageItems()} />
-                                </div>
-                            }
-                            {(!this.isLazyLoadActive && nbOfFilteredItems > this.state.showPerPage) &&
+                            {itemsDiv}
+                            {(!this.isLazyLoadActive && nbOfFilteredItems > this.props.nbOfProductsPerPage) &&
                                 <div className="products__pager-container">
                                     <Pager
                                         maxNbOfVisiblePagerItems={5}
                                         nbOfPagesSwitchToggle={3}
-                                        currentOffset={this.state.currentOffset}
+                                        currentOffset={this.props.offset}
                                         nbOfItems={nbOfFilteredItems}
-                                        nbOfItemsPerPage={this.state.showPerPage}
+                                        nbOfItemsPerPage={this.props.nbOfProductsPerPage}
                                         onClick={this.handleClickPager}
                                     />
                                 </div>
@@ -397,5 +257,20 @@ class Products extends React.Component {
     }
 }
 
+const mapStateToProps = state => ({
 
-export default Products;
+    items: state.products.items,
+    itemsError: state.products.error,
+    areItemsFetching: state.products.areItemsFetching,
+    offset: state.products.offset,
+    sortMode: state.products.sortMode,
+    nbOfVisibleItemsLazyLoad: state.products.nbOfVisibleItemsLazyLoad,
+    nbOfProductsPerPage: state.products.nbOfProductsPerPage,
+    itemsCategories: state.productsCategories.items,
+    itemsCategoriesError: state.productsCategories.error,
+    activeItemsCategories: state.productsCategories.activeItemsCategories,
+    areItemsCategoriesFetching: state.productsCategories.areItemsFetching
+
+});
+
+export default connect(mapStateToProps, { fetchProducts, updateProductsOffset, fetchProductsCategories, toggleProductCategory, updateNbOfVisibleProductsInLazyLoadMode, updateNbOfProductsPerPage, updateSortMode })(Products);
