@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Switch, Route, Redirect, withRouter } from 'react-router-dom';
 import {Helmet} from "react-helmet";
 import {injectIntl} from 'react-intl';
+import { Provider } from "react-redux";
+import store from "./store";
 
 import Translator from "./components/tools/translator";
 import Homepage from "./components/pages/Homepage";
@@ -45,23 +47,25 @@ const App = (props) => {
     }
 
     return (
-        <div>
-            <Helmet>
-                <title>{documentTitle}</title>
-            </Helmet>
-            { settings.viewportWidth > settings.mobileMenuBreakpoint && <Navbar availableLangs={settings.availableLangs} currentPageName={currentPageName} /> }
-            { settings.viewportWidth <= settings.mobileMenuBreakpoint && <MobileMenu availableLangs={settings.availableLangs} currentPageName={currentPageName} /> }
-            <Switch>
-                {settings.availableLangs.map((availableLang) => {
-                    return pages.map((page) => {
-                        return (
-                            <Route exact path={"/" + Translator(page.name + ".slug", availableLang)} component={page.component} />
-                        )
-                    })
-                })}
-                <Redirect to="/"/>
-            </Switch>
-        </div>
+        <Provider store={store}>
+            <div>
+                <Helmet>
+                    <title>{documentTitle}</title>
+                </Helmet>
+                { settings.viewportWidth > settings.mobileMenuBreakpoint && <Navbar availableLangs={settings.availableLangs} currentPageName={currentPageName} /> }
+                { settings.viewportWidth <= settings.mobileMenuBreakpoint && <MobileMenu availableLangs={settings.availableLangs} currentPageName={currentPageName} /> }
+                <Switch>
+                    {settings.availableLangs.map((availableLang) => {
+                        return pages.map((page) => {
+                            return (
+                                <Route exact path={"/" + Translator(page.name + ".slug", availableLang)} component={page.component} />
+                            )
+                        })
+                    })}
+                    <Redirect to="/"/>
+                </Switch>
+            </div>
+        </Provider>
     )
 
 }

@@ -11,7 +11,3 @@ export const settings = {
     apiUrlProductsCategories: 'https://adriengagnon.com/wp-json/wc/v2/products/categories?consumer_key=' + consumer_key + '&consumer_secret=' + consumer_password + '&per_page=100',
     cacheTimeInMinutes: 60
 };
-
-export const SettingsContext = React.createContext(
-    settings.dark // default value
-);
