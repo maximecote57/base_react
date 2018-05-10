@@ -7,7 +7,7 @@ import fr from 'react-intl/locale-data/fr';
 import Strings from "./strings.json";
 import App from "./App";
 import Cookies from 'universal-cookie';
-import {settings} from "./settings";
+import {settings} from "./SettingsContext";
 
 addLocaleData(en);
 addLocaleData(fr);
