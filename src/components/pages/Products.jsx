@@ -228,11 +228,11 @@ class Products extends React.Component {
                                 }
                                 {!this.isLazyLoadActive &&
                                     <div className="products__widget-wrapper">
-                                        <Dropdown title="Items per Page" items={this.nbOfProductsPerPageOptions} onClickItem={this.handleClickShowPerPageOption}/>
+                                        <Dropdown id="Dropdown_Products_Items_Per_Page" title="Items per Page" items={this.nbOfProductsPerPageOptions} onClickItem={this.handleClickShowPerPageOption}/>
                                     </div>
                                 }
                                 <div className="products__widget-wrapper">
-                                    <Dropdown title="Sort Order" items={this.sortModeOptions} onClickItem={this.handleClickSortOption}/>
+                                    <Dropdown id="Dropdown_Products_Sort" title="Sort Order" items={this.sortModeOptions} onClickItem={this.handleClickSortOption}/>
                                 </div>
                             </div>
                             {itemsDiv}

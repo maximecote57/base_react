@@ -1,4 +1,6 @@
 import React from "react";
+import { openDropdown, closeDropdown } from "../../actions/dropdownActions";
+import { connect } from "react-redux";
 
 import "./_dropdown.scss";
 
@@ -9,26 +11,25 @@ class Dropdown extends React.Component {
         super();
 
         this.state = {
-            isOpened: false,
             selectedItem: null
         }
+
     }
 
     handleClickBtn =  () => {
 
-        this.setState({
-            isOpened: !this.state.isOpened
-        })
+        this.props.openedDropdownId === this.props.id ? this.props.closeDropdown() : this.props.openDropdown(this.props.id);
 
     };
 
     handleClickItem =  (item) => {
 
         this.setState({
-            isOpened: false,
             selectedItem: item
         });
 
+
+        this.props.closeDropdown();
         this.props.onClickItem(item.value);
 
     };
@@ -41,7 +42,7 @@ class Dropdown extends React.Component {
                     {this.state.selectedItem ? this.state.selectedItem.text : this.props.title}
                     <i className="fas fa-chevron-down"></i>
                 </button>
-                <div className={"dropdown__list " + (this.state.isOpened ? 'is-opened' : '')}>
+                <div className={"dropdown__list " + (this.props.openedDropdownId === this.props.id ? 'is-opened' : '')}>
                     {
                         this.props.items.map((item) => {
                             return <a key={item.value} className={"dropdown__item " + (this.state.selectedItem === item ? 'is-selected' : '')} href="javascript:void(0)" onClick={this.handleClickItem.bind(this, item)}>{item.text}</a>
@@ -53,5 +54,12 @@ class Dropdown extends React.Component {
     }
 }
 
+const mapStateToProps = state => ({
 
-export default Dropdown;
+    openedDropdownId: state.dropdown.openedDropdownId
+
+});
+
+
+
+export default connect(mapStateToProps, { openDropdown, closeDropdown })(Dropdown);
