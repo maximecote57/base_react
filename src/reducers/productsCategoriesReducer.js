@@ -1,4 +1,4 @@
-import {FETCH_PRODUCTS_CATEGORIES_START, FETCH_PRODUCTS_CATEGORIES_FETCHED, FETCH_PRODUCTS_CATEGORIES_ERROR, TOGGLE_PRODUCT_CATEGORY} from "../actions/types";
+import {PRODUCTS_CATEGORIES_START_FETCH, PRODUCTS_CATEGORIES_END_FETCH, PRODUCTS_CATEGORIES_FETCH_ERROR, PRODUCTS_TOGGLE_PRODUCT_CATEGORY} from "../actions/types";
 
 const initalState = {
     items: [],
@@ -9,25 +9,25 @@ const initalState = {
 
 export default function (state = initalState, action) {
     switch(action.type) {
-        case FETCH_PRODUCTS_CATEGORIES_START:
+        case PRODUCTS_CATEGORIES_START_FETCH:
             return {
                 ...state,
                 areItemsFetching: true
             };
-        case FETCH_PRODUCTS_CATEGORIES_FETCHED:
+        case PRODUCTS_CATEGORIES_END_FETCH:
             return {
                 ...state,
                 items: action.payload,
                 areItemsFetching: false
             };
-        case FETCH_PRODUCTS_CATEGORIES_ERROR:
+        case PRODUCTS_CATEGORIES_FETCH_ERROR:
             return {
                 ...state,
                 error: action.payload,
                 areItemsFetching: false
             };
 
-        case TOGGLE_PRODUCT_CATEGORY:
+        case PRODUCTS_TOGGLE_PRODUCT_CATEGORY:
 
             const categoryId = action.payload;
             const indexOfFilterId = state.activeItemsCategories.indexOf(categoryId);

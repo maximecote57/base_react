@@ -1,14 +1,14 @@
-import { FETCH_PRODUCTS_CATEGORIES_START, FETCH_PRODUCTS_CATEGORIES_FETCHED, TOGGLE_PRODUCT_CATEGORY } from "./types";
+import { PRODUCTS_CATEGORIES_START_FETCH, PRODUCTS_CATEGORIES_END_FETCH, PRODUCTS_TOGGLE_PRODUCT_CATEGORY } from "./types";
 import { settings } from "../settings";
 
 export const fetchProductsCategories = () => dispatch => {
         dispatch({
-            type: FETCH_PRODUCTS_CATEGORIES_START
+            type: PRODUCTS_CATEGORIES_START_FETCH
         });
         return fetch(settings.apiUrlProductsCategories)
             .then((response) => response.json())
             .then(productsCategories => dispatch({
-                type: FETCH_PRODUCTS_CATEGORIES_FETCHED,
+                type: PRODUCTS_CATEGORIES_END_FETCH,
                 payload: productsCategories
             }))
 };
@@ -16,7 +16,7 @@ export const fetchProductsCategories = () => dispatch => {
 export const toggleProductCategory = (categoryId) => dispatch => {
 
     dispatch({
-        type: TOGGLE_PRODUCT_CATEGORY,
+        type: PRODUCTS_TOGGLE_PRODUCT_CATEGORY,
         payload: categoryId
     })
 
