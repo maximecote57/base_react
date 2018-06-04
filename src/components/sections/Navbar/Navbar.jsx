@@ -1,10 +1,7 @@
 import React from "react";
-import { NavLink, Link, withRouter } from "react-router-dom";
+import { NavLink, withRouter } from "react-router-dom";
 import { injectIntl, FormattedMessage } from 'react-intl';
-
-import LangSwitcher from "../molecules/LangSwitcher";
-
-import "./_navbar.scss";
+import LangSwitcher from "../../molecules/LangSwitcher/";
 
 class Navbar extends React.Component {
 

@@ -1,15 +1,13 @@
 import React, { Component } from 'react';
 import { Switch, Route, Redirect, withRouter } from 'react-router-dom';
-import {Helmet} from "react-helmet";
-import {injectIntl} from 'react-intl';
-
+import { Helmet } from "react-helmet";
+import { injectIntl } from 'react-intl';
 import Translator from "./components/tools/translator";
-import Homepage from "./components/pages/Homepage";
-import Contact from "./components/pages/Contact";
-import Products from "./components/pages/Products";
-import Navbar from "./components/sections/Navbar";
-import MobileMenu from "./components/sections/MobileMenu";
-
+import Homepage from "./components/pages/Homepage/";
+import Contact from "./components/pages/Contact/";
+import Products from "./components/pages/Products/";
+import Navbar from "./components/sections/Navbar/";
+import MobileMenu from "./components/sections/MobileMenu/";
 import "./global_styles/global_styles.scss";
 
 const App = (props) => {

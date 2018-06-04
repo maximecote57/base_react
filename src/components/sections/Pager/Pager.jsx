@@ -1,7 +1,5 @@
 import React from "react";
 
-import "./_pager.scss";
-
 const Pager = (props) => {
 
     const nbOfPages = Math.round(props.nbOfItems / props.nbOfItemsPerPage);

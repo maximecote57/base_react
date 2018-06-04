@@ -1,8 +1,6 @@
 import React from "react";
 import { injectIntl, FormattedMessage } from 'react-intl';
 
-import "./_homepage.scss";
-
 class Homepage extends React.Component {
 
     render() {

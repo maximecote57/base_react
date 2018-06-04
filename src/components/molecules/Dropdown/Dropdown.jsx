@@ -1,7 +1,5 @@
 import React from "react";
 
-import "./_dropdown.scss";
-
 class Dropdown extends React.Component {
 
     constructor() {

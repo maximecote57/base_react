@@ -1,8 +1,6 @@
 import React from "react";
 import { injectIntl, FormattedMessage } from 'react-intl';
 
-import "./_contact.scss";
-
 class Contact extends React.Component {
 
     render() {

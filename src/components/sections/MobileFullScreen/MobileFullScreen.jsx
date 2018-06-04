@@ -1,7 +1,5 @@
 import React from "react";
 
-import "./_mobile-full-screen.scss";
-
 class MobileFullScreen extends React.Component {
 
     constructor(props) {

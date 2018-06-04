@@ -1,7 +1,5 @@
 import React from "react";
 
-import "./_back-to-top-btn.scss";
-
 class BackToToTopBtn extends React.Component {
 
     constructor() {

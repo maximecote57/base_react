@@ -1,18 +1,15 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
+import ItemsList from "../../sections/ItemsList/";
+import FiltersList from "../../sections/FiltersList/";
+import Pager from "../../sections/Pager/";
+import { settings } from "../../../SettingsContext";
+import Dropdown from "../../molecules/Dropdown/";
+import BackToTopBtn from "../../molecules/BackToTopBtn/";
+import MobileFullScreen from "../../sections/MobileFullScreen/";
+import { getDiffBetweenTwoDatesInMinutes } from "../../tools/DateHelpers";
+import { orderAlphabeticallyAsc, orderAlphabeticallyDesc } from "../../tools/SortHelpers";
 
-import ItemsList from "../sections/ItemsList";
-import FiltersList from "../sections/FiltersList";
-import Pager from "../sections/Pager";
-import { settings } from "../../SettingsContext";
-import Dropdown from "../molecules/Dropdown";
-import BackToTopBtn from "../molecules/BackToTopBtn";
-import MobileFullScreen from "../sections/MobileFullScreen";
-
-import {getDiffBetweenTwoDatesInMinutes} from "../tools/DateHelpers";
-import {orderAlphabeticallyAsc, orderAlphabeticallyDesc} from "../tools/SortHelpers";
-
-import "./_products.scss";
 
 class Products extends React.Component {
 
@@ -112,7 +109,7 @@ class Products extends React.Component {
         return fetch(settings.apiUrlProducts)
             .then((response) => response.json());
 
-    }
+    };
 
     getItems = () => {
 

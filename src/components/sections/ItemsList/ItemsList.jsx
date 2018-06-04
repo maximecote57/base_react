@@ -1,8 +1,6 @@
 import React from "react";
 
-import "./_items-list.scss";
-
-const ItemsList = ({items}) => {
+const ItemsList = ({ items }) => {
 
     return(
         <div className="items-list component">

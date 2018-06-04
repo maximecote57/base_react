@@ -8,10 +8,7 @@
 import React from "react";
 import { Link, withRouter } from "react-router-dom";
 import { injectIntl, FormattedMessage } from 'react-intl';
-
-import LangSwitcher from "../molecules/LangSwitcher";
-
-import "./_mobile-menu.scss";
+import LangSwitcher from "../../molecules/LangSwitcher/";
 
 class MobileMenu extends React.Component {
 

@@ -12,9 +12,7 @@
  */
 
 import React from "react";
-import { injectIntl, FormattedMessage } from 'react-intl';
-
-import "./_filters-list.scss";
+import { injectIntl } from 'react-intl';
 
 const FiltersList = (props) => {
 

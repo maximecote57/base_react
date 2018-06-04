@@ -1,10 +1,7 @@
 import React from "react";
-
 import { injectIntl } from 'react-intl';
 import { withRouter } from "react-router-dom";
-import Translator from "../tools/translator";
-
-import "./_lang-switcher.scss";
+import Translator from "../../tools/translator";
 
 class LangSwitcher extends React.Component {
 
@@ -29,7 +26,7 @@ class LangSwitcher extends React.Component {
 
         return URLinAnotherLang;
 
-    }
+    };
 
     render() {
 
@@ -42,7 +39,7 @@ class LangSwitcher extends React.Component {
         )
     }
 
-};
+}
 
 
 export default withRouter(injectIntl(LangSwitcher));
