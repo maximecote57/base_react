@@ -1,21 +1,21 @@
-import { PRODUCTS_START_FETCH, PRODUCTS_END_FETCH, PRODUCTS_FETCH_ERROR, PRODUCTS_UPDATE_OFFSET, PRODUCTS_UPDATE_NB_OF_VISIBLE_PRODUCTS_LAZY_LOAD, PRODUCTS_UPDATE_NB_OF_PRODUCTS_PER_PAGE, PRODUCTS_UPDATE_SORT_MODE } from "./types";
+import { FETCH_PRODUCTS_START, FETCH_PRODUCTS_FETCHED, FETCH_PRODUCTS_ERROR, UPDATE_PRODUCTS_OFFSET, UPDATE_NB_OF_VISIBLE_PRODUCTS_IN_LAZY_LOAD_MODE, UPDATE_NB_OF_PRODUCTS_PER_PAGE, UPDATE_SORT_MODE } from "./types";
 import { settings } from "../settings";
 import axios from "axios";
 
 export const fetchProducts = () => dispatch => {
         dispatch({
-            type: PRODUCTS_START_FETCH
+            type: FETCH_PRODUCTS_START
         });
         return axios.get(settings.apiUrlProducts)
             .then(response => {
                 dispatch({
-                    type: PRODUCTS_END_FETCH,
+                    type: FETCH_PRODUCTS_FETCHED,
                     payload: response.data
                 })
             })
             .catch(error => {
                 dispatch({
-                    type: PRODUCTS_FETCH_ERROR,
+                    type: FETCH_PRODUCTS_ERROR,
                     payload: error
                 })
             })
@@ -24,7 +24,7 @@ export const fetchProducts = () => dispatch => {
 export const updateProductsOffset = (offset) => dispatch => {
 
     dispatch({
-        type: PRODUCTS_UPDATE_OFFSET,
+        type: UPDATE_PRODUCTS_OFFSET,
         payload: offset
     });
 
@@ -33,7 +33,7 @@ export const updateProductsOffset = (offset) => dispatch => {
 export const updateNbOfVisibleProductsInLazyLoadMode = () => dispatch => {
 
     dispatch({
-        type: PRODUCTS_UPDATE_NB_OF_VISIBLE_PRODUCTS_LAZY_LOAD
+        type: UPDATE_NB_OF_VISIBLE_PRODUCTS_IN_LAZY_LOAD_MODE
     });
 
 };
@@ -41,7 +41,7 @@ export const updateNbOfVisibleProductsInLazyLoadMode = () => dispatch => {
 export const updateNbOfProductsPerPage = (nbOfProductsPerPage) => dispatch => {
 
     dispatch({
-        type: PRODUCTS_UPDATE_NB_OF_PRODUCTS_PER_PAGE,
+        type: UPDATE_NB_OF_PRODUCTS_PER_PAGE,
         payload: nbOfProductsPerPage
     });
 
@@ -50,7 +50,7 @@ export const updateNbOfProductsPerPage = (nbOfProductsPerPage) => dispatch => {
 export const updateSortMode = (sortMode) => dispatch => {
 
     dispatch({
-        type: PRODUCTS_UPDATE_SORT_MODE,
+        type: UPDATE_SORT_MODE,
         payload: sortMode
     });
 

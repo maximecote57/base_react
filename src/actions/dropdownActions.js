@@ -1,9 +1,9 @@
-import { DROPDOWN_OPEN, DROPDOWN_CLOSE } from "./types";
+import { OPEN_DROPDOWN, CLOSE_DROPDOWN } from "./types";
 
 export const openDropdown = (dropdownID) => dispatch => {
 
     dispatch({
-        type: DROPDOWN_OPEN,
+        type: OPEN_DROPDOWN,
         payload: dropdownID
     });
 
@@ -12,7 +12,7 @@ export const openDropdown = (dropdownID) => dispatch => {
 export const closeDropdown = () => dispatch => {
 
     dispatch({
-        type: DROPDOWN_CLOSE
+        type: CLOSE_DROPDOWN
     });
 
 };

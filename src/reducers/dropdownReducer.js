@@ -1,4 +1,4 @@
-import { DROPDOWN_OPEN, DROPDOWN_CLOSE } from "../actions/types";
+import { OPEN_DROPDOWN, CLOSE_DROPDOWN } from "../actions/types";
 
 const initalState = {
     openedDropdownId: null
@@ -6,12 +6,12 @@ const initalState = {
 
 export default function (state = initalState, action) {
     switch(action.type) {
-        case DROPDOWN_OPEN:
+        case OPEN_DROPDOWN:
             return {
                 ...state,
                 openedDropdownId: action.payload
             };
-        case DROPDOWN_CLOSE:
+        case CLOSE_DROPDOWN:
             return {
                 ...state,
                 openedDropdownId: null

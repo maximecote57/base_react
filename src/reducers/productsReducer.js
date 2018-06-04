@@ -1,4 +1,4 @@
-import {PRODUCTS_START_FETCH, PRODUCTS_END_FETCH, PRODUCTS_FETCH_ERROR, PRODUCTS_UPDATE_OFFSET, PRODUCTS_UPDATE_NB_OF_VISIBLE_PRODUCTS_LAZY_LOAD, PRODUCTS_UPDATE_NB_OF_PRODUCTS_PER_PAGE, PRODUCTS_UPDATE_SORT_MODE } from "../actions/types";
+import {FETCH_PRODUCTS_START, FETCH_PRODUCTS_FETCHED, FETCH_PRODUCTS_ERROR, UPDATE_PRODUCTS_OFFSET, UPDATE_NB_OF_VISIBLE_PRODUCTS_IN_LAZY_LOAD_MODE, UPDATE_NB_OF_PRODUCTS_PER_PAGE, UPDATE_SORT_MODE } from "../actions/types";
 
 const initalState = {
     items: [],
@@ -14,39 +14,39 @@ const initalState = {
 
 export default function (state = initalState, action) {
     switch(action.type) {
-        case PRODUCTS_START_FETCH:
+        case FETCH_PRODUCTS_START:
             return {
                 ...state,
                 areItemsFetching: true
             };
-        case PRODUCTS_END_FETCH:
+        case FETCH_PRODUCTS_FETCHED:
             return {
                 ...state,
                 items: action.payload,
                 areItemsFetching: false
             };
-        case PRODUCTS_FETCH_ERROR:
+        case FETCH_PRODUCTS_ERROR:
             return {
                 ...state,
                 error: action.payload,
                 areItemsFetching: false
             };
-        case PRODUCTS_UPDATE_OFFSET:
+        case UPDATE_PRODUCTS_OFFSET:
             return {
                 ...state,
                 offset: action.payload
             };
-        case PRODUCTS_UPDATE_NB_OF_VISIBLE_PRODUCTS_LAZY_LOAD:
+        case UPDATE_NB_OF_VISIBLE_PRODUCTS_IN_LAZY_LOAD_MODE:
             return {
                 ...state,
                 nbOfVisibleItemsLazyLoad: state.nbOfVisibleItemsLazyLoad + state.nbOfProductsPerPage
             };
-        case PRODUCTS_UPDATE_NB_OF_PRODUCTS_PER_PAGE:
+        case UPDATE_NB_OF_PRODUCTS_PER_PAGE:
             return {
                 ...state,
                 nbOfProductsPerPage: action.payload
             };
-        case PRODUCTS_UPDATE_SORT_MODE:
+        case UPDATE_SORT_MODE:
             return {
                 ...state,
                 sortMode: action.payload
