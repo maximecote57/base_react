@@ -2,10 +2,13 @@ import React from "react";
 import { NavLink, withRouter } from "react-router-dom";
 import { injectIntl, FormattedMessage } from 'react-intl';
 import LangSwitcher from "../../molecules/LangSwitcher/";
+import Translator from "../../tools/translator";
 
 class Navbar extends React.Component {
 
     render() {
+
+        const { pages, currentPageName, availableLangs, intl } = this.props;
 
         return (
             <div className="navbar component">
@@ -14,23 +17,33 @@ class Navbar extends React.Component {
                 </div>
                 <div className="navbar__section navbar__section--right">
                     <div className="navbar__links-container">
+                        {
+                            pages.map((page) => {
+
+                                const slug = Translator(page.slug + ".slug", intl.locale);
+
+                                return (
+                                    <div className="navbar__link-wrapper" key={"page-" + page.ID}>
+                                        <NavLink
+                                            exact
+                                            className="navbar__link"
+                                            activeClassName="is-active"
+                                            to={"/" + slug}
+                                        >
+                                            <FormattedMessage
+                                                id={page.slug + ".title"}
+                                                default={page.title}
+                                            />
+                                        </NavLink>
+                                    </div>
+                                )
+                            })
+                        }
                         <div className="navbar__link-wrapper">
-                            <NavLink exact className="navbar__link" activeClassName="is-active" to="/">
-                                <FormattedMessage id="homepage.title" default="Home" />
-                            </NavLink>
-                        </div>
-                        <div className="navbar__link-wrapper">
-                            <NavLink className="navbar__link" activeClassName="is-active" to={"/" + this.props.intl.formatMessage({id: "products.slug"})}>
-                                <FormattedMessage id="products.title" default="Products" />
-                            </NavLink>
-                        </div>
-                        <div className="navbar__link-wrapper">
-                            <NavLink className="navbar__link" activeClassName="is-active" to={"/" + this.props.intl.formatMessage({id: "contact.slug"})}>
-                                <FormattedMessage id="contact.title" default="Contact" />
-                            </NavLink>
-                        </div>
-                        <div className="navbar__link-wrapper">
-                            <LangSwitcher availableLangs={this.props.availableLangs} currentPageName={this.props.currentPageName}/>
+                            <LangSwitcher
+                                availableLangs={availableLangs}
+                                currentPageName={currentPageName}
+                            />
                         </div>
                     </div>
                 </div>
