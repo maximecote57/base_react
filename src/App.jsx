@@ -24,9 +24,9 @@ class App extends React.Component {
             products: Products
         };
         this.state = {
-            pages: [],
-            navbarPages: [],
-            mobileMenuPages: [],
+            pagesLoadedViaAPI: [],
+            navbarPagesLoadedViaAPI: [],
+            mobileMenuPagesLoadedViaAPI: [],
             currentPageName: ''
         }
 
@@ -40,7 +40,7 @@ class App extends React.Component {
             currentPageName = this.props.settings.defaultPageName;
         }
 
-        this.state.pages.forEach((page) => {
+        this.state.pagesLoadedViaAPI.forEach((page) => {
             if(this.props.intl.messages[page.post_name + '.slug']) {
                 const slug = this.props.intl.formatMessage({ id: page.post_name + '.slug' });
                 if(slug === currentPageName) {
@@ -58,9 +58,9 @@ class App extends React.Component {
         axios.get(this.props.settings.apiUrlPages)
             .then(res => {
 
-                const pages = res.data;
+                const pagesLoadedViaAPI = res.data;
 
-                this.setState({pages}, () => {
+                this.setState({pagesLoadedViaAPI}, () => {
                     this.setState({
                         currentPageName: this.getCurrentPageNameInEnglish()
                     })
@@ -74,10 +74,10 @@ class App extends React.Component {
                 const menus = res.data;
                 const navbarData = menus.find((menu) => menu['slug'] === 'navbar');
                 const mobileMenuData = menus.find((menu) => menu['slug'] === 'mobile-menu');
-                const navbarPages = navbarData !== undefined ? navbarData.pages : [];
-                const mobileMenuPages = mobileMenuData !== undefined ? mobileMenuData.pages : [];
+                const navbarPagesLoadedViaAPI = navbarData !== undefined ? navbarData.pages : [];
+                const mobileMenuPagesLoadedViaAPI = mobileMenuData !== undefined ? mobileMenuData.pages : [];
 
-                this.setState({ navbarPages, mobileMenuPages });
+                this.setState({ navbarPagesLoadedViaAPI, mobileMenuPagesLoadedViaAPI });
 
             })
     }
@@ -96,20 +96,20 @@ class App extends React.Component {
 
     }
 
-    // Filters the pages of a menu to show only the links to pages
+    // Filters the pages of a menu loaded via the API to show only the links to pages
     // created in React, imported in this file and put in the pagesComponents array
     getFilteredPagesOfAMenu = (pagesOfAMenu, menuName) => {
 
-        let filteredPages = [];
+        let filteredPagesOfAMenu = [];
 
-        if(this.state.pages.length > 0 && pagesOfAMenu.length > 0) {
+        if(this.state.pagesLoadedViaAPI.length > 0 && pagesOfAMenu.length > 0) {
 
-            filteredPages = pagesOfAMenu.filter((page) => {
+            filteredPagesOfAMenu = pagesOfAMenu.filter((page) => {
                 if(this.pagesComponents.hasOwnProperty(page.slug)) {
                     return true;
                 }
                 else {
-                    console.log('REPTILE WARNING - ', page.title, ' is included in the ', menuName,' menu but has not been created in React.')
+                    console.warn('REPTILE WARNING - ', page.title, ' is included in the ', menuName,' menu loaded via the API but has not been created in React.')
                     return false;
                 }
 
@@ -117,14 +117,41 @@ class App extends React.Component {
 
         }
 
-        return filteredPages;
+        return filteredPagesOfAMenu;
+
+    };
+
+    // Filters the pages loaded via the API to render pages
+    // also created in React, imported in this file and put in the pagesComponents array
+    getFilteredPages = () => {
+
+      let filteredPages = [];
+
+      if(this.state.pagesLoadedViaAPI.length > 0) {
+
+          filteredPages = this.state.pagesLoadedViaAPI.filter((page) => {
+
+              if(this.pagesComponents[page.post_name] !== undefined) {
+                  return true;
+              }
+              else {
+                  console.warn('REPTILE WARNING - ', page.post_title, ' is included in the pages loaded via the API, but has not been created in React.')
+                  return false;
+              }
+
+          });
+
+      }
+
+      return filteredPages;
 
     };
 
     render() {
 
-        let filteredNavbarPages = this.getFilteredPagesOfAMenu(this.state.navbarPages, 'navbar');
-        let filteredMobileMenuPages = this.getFilteredPagesOfAMenu(this.state.mobileMenuPages, 'mobile');
+        let filteredNavbarPages = this.getFilteredPagesOfAMenu(this.state.navbarPagesLoadedViaAPI, 'navbar');
+        let filteredMobileMenuPages = this.getFilteredPagesOfAMenu(this.state.mobileMenuPagesLoadedViaAPI, 'mobile');
+        let filteredPages = this.getFilteredPages();
 
         return (
             <div>
@@ -137,10 +164,10 @@ class App extends React.Component {
                 {(filteredMobileMenuPages.length > 0 && this.settings.viewportWidth <= this.settings.mobileMenuBreakpoint) &&
                     <MobileMenu pages={filteredMobileMenuPages} availableLangs={this.settings.availableLangs} currentPageName={this.state.currentPageName} />
                 }
-                {this.state.pages.length > 0 &&
+                {filteredPages.length > 0 &&
                     <Switch>
                         {this.settings.availableLangs.map((availableLang) => {
-                            return this.state.pages.map((page) => {
+                            return filteredPages.map((page) => {
                                 return (
                                     <Route exact path={"/" + Translator(page.post_name + ".slug", availableLang)} component={this.pagesComponents[page.post_name]} />
                                 )
