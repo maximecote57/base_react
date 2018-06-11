@@ -14,7 +14,6 @@ class Homepage extends React.Component {
             isLoadingInfosFromAPI : true
         }
 
-
     }
 
     componentDidMount() {
