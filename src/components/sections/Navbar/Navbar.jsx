@@ -2,7 +2,7 @@ import React from "react";
 import { NavLink, withRouter } from "react-router-dom";
 import { injectIntl, FormattedMessage } from 'react-intl';
 import LangSwitcher from "../../molecules/LangSwitcher/";
-import Translator from "../../tools/translator";
+import Translator from "../../tools/Translator";
 
 class Navbar extends React.Component {
 

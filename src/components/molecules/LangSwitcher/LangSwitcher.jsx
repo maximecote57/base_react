@@ -1,7 +1,7 @@
 import React from "react";
 import { injectIntl } from 'react-intl';
 import { withRouter } from "react-router-dom";
-import Translator from "../../tools/translator";
+import Translator from "../../tools/Translator";
 
 class LangSwitcher extends React.Component {
 
