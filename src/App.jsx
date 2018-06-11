@@ -3,10 +3,10 @@ import { Switch, Route, Redirect, withRouter } from 'react-router-dom';
 import { Helmet } from "react-helmet";
 import { injectIntl } from 'react-intl';
 import axios from 'axios';
-import Translator from "./components/tools/translator";
-import Homepage from "./components/pages/Homepage/";
-import Contact from "./components/pages/Contact/";
-import Products from "./components/pages/Products/";
+import Translator from "./components/tools/Translator";
+import Homepage from "./components/pagesTemplates/Homepage/";
+import Contact from "./components/pagesTemplates/Contact/";
+import Products from "./components/pagesTemplates/Products/";
 import Navbar from "./components/sections/Navbar/";
 import MobileMenu from "./components/sections/MobileMenu/";
 import "./global_styles/global_styles.scss";
@@ -18,11 +18,6 @@ class App extends React.Component {
         super(props);
         this.settings = props.settings;
         this.documentTitle = props.intl.formatMessage({ id: 'document.title' });
-        this.pagesComponents = {
-            homepage: Homepage,
-            contact: Contact,
-            products: Products
-        };
         this.state = {
             pagesLoadedViaAPI: [],
             navbarPagesLoadedViaAPI: [],
@@ -32,7 +27,7 @@ class App extends React.Component {
 
     }
 
-    getCurrentPageNameInEnglish() {
+    getCurrentPageNameInEnglish(pages) {
 
         let currentPageName = this.props.location.pathname.split('/')[1];
 
@@ -40,7 +35,7 @@ class App extends React.Component {
             currentPageName = this.props.settings.defaultPageName;
         }
 
-        this.state.pagesLoadedViaAPI.forEach((page) => {
+        pages.forEach((page) => {
             if(this.props.intl.messages[page.post_name + '.slug']) {
                 const slug = this.props.intl.formatMessage({ id: page.post_name + '.slug' });
                 if(slug === currentPageName) {
@@ -55,31 +50,27 @@ class App extends React.Component {
 
     componentDidMount() {
 
+        let pagesLoadedViaAPI = [];
+        console.log('componendDidMount, App');
         axios.get(this.props.settings.apiUrlPages)
-            .then(res => {
+            .then(res => { return res.data; })
+            .then((pages) => {
+                pagesLoadedViaAPI = pages;
+                axios
+                    .get(this.props.settings.apiUrlMenus)
+                    .then(res => { return res.data; })
+                    .then((menus) => {
 
-                const pagesLoadedViaAPI = res.data;
+                        const navbarData = menus.find((menu) => menu['slug'] === 'navbar');
+                        const mobileMenuData = menus.find((menu) => menu['slug'] === 'mobile-menu');
+                        const navbarPagesLoadedViaAPI = navbarData !== undefined ? navbarData.pages : [];
+                        const mobileMenuPagesLoadedViaAPI = mobileMenuData !== undefined ? mobileMenuData.pages : [];
 
-                this.setState({pagesLoadedViaAPI}, () => {
-                    this.setState({
-                        currentPageName: this.getCurrentPageNameInEnglish()
-                    })
-                });
+                        this.setState({ navbarPagesLoadedViaAPI, mobileMenuPagesLoadedViaAPI, pagesLoadedViaAPI, currentPageName: this.getCurrentPageNameInEnglish(pagesLoadedViaAPI) });
 
-            })
+                    });
 
-        axios.get(this.props.settings.apiUrlMenus)
-            .then(res => {
-
-                const menus = res.data;
-                const navbarData = menus.find((menu) => menu['slug'] === 'navbar');
-                const mobileMenuData = menus.find((menu) => menu['slug'] === 'mobile-menu');
-                const navbarPagesLoadedViaAPI = navbarData !== undefined ? navbarData.pages : [];
-                const mobileMenuPagesLoadedViaAPI = mobileMenuData !== undefined ? mobileMenuData.pages : [];
-
-                this.setState({ navbarPagesLoadedViaAPI, mobileMenuPagesLoadedViaAPI });
-
-            })
+            });
     }
 
     componentDidUpdate(prevProps) {
@@ -91,89 +82,57 @@ class App extends React.Component {
     onRouteChanged() {
 
         this.setState({
-            currentPageName: this.getCurrentPageNameInEnglish()
+            currentPageName: this.getCurrentPageNameInEnglish(this.state.pagesLoadedViaAPI)
         });
 
     }
 
-    // Filters the pages of a menu loaded via the API to show only the links to pages
-    // created in React, imported in this file and put in the pagesComponents array
-    getFilteredPagesOfAMenu = (pagesOfAMenu, menuName) => {
+    getRoute = (page) => {
 
-        let filteredPagesOfAMenu = [];
+        let defaultRouteProps = {
+            key: 'route-' + page.ID,
+            exact: true,
+            path: '/' + Translator(page.post_name + ".slug", this.props.intl.locale)
+        };
 
-        if(this.state.pagesLoadedViaAPI.length > 0 && pagesOfAMenu.length > 0) {
-
-            filteredPagesOfAMenu = pagesOfAMenu.filter((page) => {
-                if(this.pagesComponents.hasOwnProperty(page.slug)) {
-                    return true;
-                }
-                else {
-                    console.warn('REPTILE WARNING - ', page.title, ' is included in the ', menuName,' menu loaded via the API but has not been created in React.')
-                    return false;
-                }
-
-            });
-
+        switch(page.template) {
+            case 'homepage':
+                return <Route {...defaultRouteProps} render={(props) => <Homepage {...props} pageId={page.ID} />}/>;
+                break;
+            case 'contact':
+                return <Route {...defaultRouteProps} render={(props) => <Contact {...props} pageId={page.ID} />}/>;
+                break;
+            case 'products':
+                return <Route {...defaultRouteProps} render={(props) => <Products {...props} pageId={page.ID} />}/>;
+                break;
         }
-
-        return filteredPagesOfAMenu;
-
-    };
-
-    // Filters the pages loaded via the API to render pages
-    // also created in React, imported in this file and put in the pagesComponents array
-    getFilteredPages = () => {
-
-      let filteredPages = [];
-
-      if(this.state.pagesLoadedViaAPI.length > 0) {
-
-          filteredPages = this.state.pagesLoadedViaAPI.filter((page) => {
-
-              if(this.pagesComponents[page.post_name] !== undefined) {
-                  return true;
-              }
-              else {
-                  console.warn('REPTILE WARNING - ', page.post_title, ' is included in the pages loaded via the API, but has not been created in React.')
-                  return false;
-              }
-
-          });
-
-      }
-
-      return filteredPages;
 
     };
 
     render() {
 
-        let filteredNavbarPages = this.getFilteredPagesOfAMenu(this.state.navbarPagesLoadedViaAPI, 'navbar');
-        let filteredMobileMenuPages = this.getFilteredPagesOfAMenu(this.state.mobileMenuPagesLoadedViaAPI, 'mobile');
-        let filteredPages = this.getFilteredPages();
+        const navbarPages = this.state.navbarPagesLoadedViaAPI;
+        const mobileMenuPages = this.state.mobileMenuPagesLoadedViaAPI;
+        const pages = this.state.pagesLoadedViaAPI;
 
         return (
             <div>
                 <Helmet>
                     <title>{this.documentTitle}</title>
                 </Helmet>
-                {(filteredNavbarPages.length > 0 && this.settings.viewportWidth > this.settings.mobileMenuBreakpoint) &&
-                    <Navbar pages={filteredNavbarPages} availableLangs={this.settings.availableLangs} currentPageName={this.state.currentPageName} />
+                {(navbarPages.length > 0 && this.settings.viewportWidth > this.settings.mobileMenuBreakpoint) &&
+                    <Navbar pages={navbarPages} availableLangs={this.settings.availableLangs} currentPageName={this.state.currentPageName} />
                 }
-                {(filteredMobileMenuPages.length > 0 && this.settings.viewportWidth <= this.settings.mobileMenuBreakpoint) &&
-                    <MobileMenu pages={filteredMobileMenuPages} availableLangs={this.settings.availableLangs} currentPageName={this.state.currentPageName} />
+                {(mobileMenuPages.length > 0 && this.settings.viewportWidth <= this.settings.mobileMenuBreakpoint) &&
+                    <MobileMenu pages={mobileMenuPages} availableLangs={this.settings.availableLangs} currentPageName={this.state.currentPageName} />
                 }
-                {filteredPages.length > 0 &&
+                {pages.length > 0 &&
                     <Switch>
-                        {this.settings.availableLangs.map((availableLang) => {
-                            return filteredPages.map((page) => {
-                                return (
-                                    <Route exact path={"/" + Translator(page.post_name + ".slug", availableLang)} component={this.pagesComponents[page.post_name]} />
-                                )
+                        {
+                            pages.map((page) => {
+                                return this.getRoute(page);
                             })
-                        })}
-                        <Redirect to="/"/>
+                        }
                     </Switch>
                 }
             </div>

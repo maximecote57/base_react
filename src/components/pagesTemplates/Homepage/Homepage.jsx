@@ -19,7 +19,7 @@ class Homepage extends React.Component {
 
     componentDidMount() {
         console.log('componentDidMount - homepage')
-        axios.get(settings.apiUrlPages + '/' + 2)
+        axios.get(settings.apiUrlPages + '/' + this.props.pageId)
             .then(res => {
 
                 const pageInfosFromAPI = res.data;
