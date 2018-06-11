@@ -10,29 +10,40 @@ class Homepage extends React.Component {
         super(props);
 
         this.state = {
-            pageContent: '',
+            pageData: '',
             isLoadingInfosFromAPI : true
         }
 
     }
 
     componentDidMount() {
-        console.log('componentDidMount - homepage')
-        axios.get(settings.apiUrlPages + '/' + this.props.pageId)
-            .then(res => {
 
-                const pageInfosFromAPI = res.data;
+        if(this.props.pagesContents['homepage'] !== undefined) {
+            this.setState({
+                pageData: this.props.pagesContents['homepage'],
+                isLoadingInfosFromAPI: false
+            });
 
-                this.setState({
-                    pageContent: pageInfosFromAPI.post_content,
-                    isLoadingInfosFromAPI: false
+        }
+        else {
+
+            axios.get(settings.apiUrlPages + '/' + this.props.pageId)
+                .then(res => {
+
+                    const pageDataFromAPI = res.data;
+
+                    this.props.onDataLoaded(pageDataFromAPI);
+
+                    this.setState({
+                        pageData: pageDataFromAPI,
+                        isLoadingInfosFromAPI: false
+                    })
                 })
-            })
+        }
 
     }
 
     render() {
-        console.log('render -  homepage');
         return (
             <div className="contact component">
                 <div className="container">
@@ -46,7 +57,7 @@ class Homepage extends React.Component {
                             <div>Loading infos from API</div>
                         }
                         {!this.state.isLoadingInfosFromAPI &&
-                            <div dangerouslySetInnerHTML={{__html: this.state.pageContent}} ></div>
+                            <div dangerouslySetInnerHTML={{__html: this.state.pageData.post_content}} ></div>
                         }
                     </div>
                 </div>

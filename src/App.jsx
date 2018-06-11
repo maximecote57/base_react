@@ -22,7 +22,8 @@ class App extends React.Component {
             pagesLoadedViaAPI: [],
             navbarPagesLoadedViaAPI: [],
             mobileMenuPagesLoadedViaAPI: [],
-            currentPageName: ''
+            currentPageName: '',
+            pagesContents: {}
         }
 
     }
@@ -87,6 +88,16 @@ class App extends React.Component {
 
     }
 
+    handleDataLoaded = (data) => {
+
+        let pagesContents = this.state.pagesContents;
+
+        pagesContents[data.post_name] = data;
+
+        this.setState({ pagesContents });
+
+    }
+
     getRoute = (page) => {
 
         let defaultRouteProps = {
@@ -97,13 +108,13 @@ class App extends React.Component {
 
         switch(page.template) {
             case 'homepage':
-                return <Route {...defaultRouteProps} render={(props) => <Homepage {...props} pageId={page.ID} />}/>;
+                return <Route {...defaultRouteProps} render={(props) => <Homepage {...props} pagesContents={this.state.pagesContents} onDataLoaded={this.handleDataLoaded} pageId={page.ID} />}/>;
                 break;
             case 'contact':
-                return <Route {...defaultRouteProps} render={(props) => <Contact {...props} pageId={page.ID} />}/>;
+                return <Route {...defaultRouteProps} render={(props) => <Contact {...props} pagesContents={this.state.pagesContents} onDataLoaded={this.handleDataLoaded} pageId={page.ID} />}/>;
                 break;
             case 'products':
-                return <Route {...defaultRouteProps} render={(props) => <Products {...props} pageId={page.ID} />}/>;
+                return <Route {...defaultRouteProps} render={(props) => <Products {...props} pagesContents={this.state.pagesContents} onDataLoaded={this.handleDataLoaded} pageId={page.ID} />}/>;
                 break;
         }
 
