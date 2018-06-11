@@ -15,7 +15,3 @@ export const settings = {
     cacheTimeInMinutes: 60,
     defaultPageName: 'homepage'
 };
-
-export const SettingsContext = React.createContext(
-    settings.dark // default value
-);
