@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import { Switch, Route, Redirect, withRouter } from 'react-router-dom';
+import { Switch, Route, withRouter } from 'react-router-dom';
 import { Helmet } from "react-helmet";
 import { injectIntl } from 'react-intl';
 import axios from 'axios';
+import withFetching from "./components/hoc/WithFetching";
 import Translator from "./components/tools/Translator";
 import Homepage from "./components/pagesTemplates/Homepage/";
 import Contact from "./components/pagesTemplates/Contact/";
@@ -74,30 +75,6 @@ class App extends React.Component {
             });
     }
 
-    componentDidUpdate(prevProps) {
-        if (this.props.location !== prevProps.location) {
-            this.onRouteChanged();
-        }
-    }
-
-    onRouteChanged() {
-
-        this.setState({
-            currentPageName: this.getCurrentPageNameInEnglish(this.state.pagesLoadedViaAPI)
-        });
-
-    }
-
-    handleDataLoaded = (data) => {
-
-        let pagesContents = this.state.pagesContents;
-
-        pagesContents[data.post_name] = data;
-
-        this.setState({ pagesContents });
-
-    }
-
     getRoute = (page) => {
 
         let defaultRouteProps = {
@@ -106,15 +83,17 @@ class App extends React.Component {
             path: '/' + Translator(page.post_name + ".slug", this.props.intl.locale)
         };
 
+        const apiUrl = this.props.settings.apiUrlPages + '/' + page.ID + `?lang=${this.props.intl.locale}`;
+
         switch(page.template) {
             case 'homepage':
-                return <Route {...defaultRouteProps} render={(props) => <Homepage {...props} pagesContents={this.state.pagesContents} onDataLoaded={this.handleDataLoaded} pageId={page.ID} />}/>;
+                return <Route {...defaultRouteProps} component={withFetching(apiUrl)(Homepage)} />;
                 break;
             case 'contact':
-                return <Route {...defaultRouteProps} render={(props) => <Contact {...props} pagesContents={this.state.pagesContents} onDataLoaded={this.handleDataLoaded} pageId={page.ID} />}/>;
+                return <Route {...defaultRouteProps} component={withFetching(apiUrl)(Contact)} />;
                 break;
             case 'products':
-                return <Route {...defaultRouteProps} render={(props) => <Products {...props} pagesContents={this.state.pagesContents} onDataLoaded={this.handleDataLoaded} pageId={page.ID} />}/>;
+                return <Route {...defaultRouteProps} component={withFetching(apiUrl)(Products)} />;
                 break;
         }
 
@@ -139,11 +118,9 @@ class App extends React.Component {
                 }
                 {pages.length > 0 &&
                     <Switch>
-                        {
-                            pages.map((page) => {
-                                return this.getRoute(page);
-                            })
-                        }
+                        {pages.map((page) => {
+                            return this.getRoute(page);
+                        })}
                     </Switch>
                 }
             </div>
