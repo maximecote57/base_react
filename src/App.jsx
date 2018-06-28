@@ -83,7 +83,14 @@ class App extends React.Component {
             path: '/' + Translator(page.post_name + ".slug", this.props.intl.locale)
         };
 
-        const apiUrl = this.props.settings.apiUrlPages + '/' + page.ID + `?lang=${this.props.intl.locale}`;
+        let apiUrl = this.props.settings.apiUrlPages + '/' + page.ID;
+
+        // This is to prevent a bug caused by Wordpress WPML, where when an API request is done with
+        // the lang GET parameter with the default language as the value, it redirects to the same URL
+        // without the GET parameter, causing issues because of CORS
+        if(this.props.intl.locale !== this.props.settings.defaultLang) {
+            apiUrl += `?lang=${this.props.intl.locale}`;
+        }
 
         switch(page.template) {
             case 'homepage':
