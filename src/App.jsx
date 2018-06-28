@@ -53,7 +53,7 @@ class App extends React.Component {
     componentDidMount() {
 
         let pagesLoadedViaAPI = [];
-        console.log('componendDidMount, App');
+
         axios.get(this.props.settings.apiUrlPages)
             .then(res => { return res.data; })
             .then((pages) => {
