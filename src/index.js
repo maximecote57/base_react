@@ -7,7 +7,7 @@ import fr from 'react-intl/locale-data/fr';
 import Strings from "./strings.json";
 import App from "./App";
 import Cookies from 'universal-cookie';
-import {settings} from "./SettingsContext";
+import { settings } from "./SettingsContext";
 
 addLocaleData(en);
 addLocaleData(fr);
@@ -15,7 +15,7 @@ addLocaleData(fr);
 const cookies = new Cookies();
 const currentURLPathname = window.location.pathname;
 const firstPathSegment = currentURLPathname !== "/" ? currentURLPathname.split('/')[1] : "";
-let currentLang = "en";
+let currentLang = settings.defaultLang;
 
 if(settings.availableLangs.indexOf(firstPathSegment) !== -1 ) {
     currentLang = firstPathSegment;

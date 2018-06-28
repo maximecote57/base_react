@@ -7,7 +7,8 @@ const apiUrlBase = 'http://localhost/wp-json/reptile/';
 export const settings = {
     viewportWidth: window.innerWidth,
     mobileMenuBreakpoint: 768,
-    availableLangs: ["en", "fr"],
+    defaultLang: 'en',
+    availableLangs: ['en', 'fr'],
     apiUrlPages: apiUrlBase + 'pages',
     apiUrlMenus: apiUrlBase + 'menus',
     apiUrlProducts: 'https://adriengagnon.com/wp-json/wc/v2/products?per_page=100&consumer_key=' + consumer_key + '&consumer_secret=' + consumer_password,
