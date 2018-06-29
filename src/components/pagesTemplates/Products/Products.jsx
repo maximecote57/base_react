@@ -3,7 +3,7 @@ import { FormattedMessage } from 'react-intl';
 import ItemsList from "../../sections/ItemsList/";
 import FiltersList from "../../sections/FiltersList/";
 import Pager from "../../sections/Pager/";
-import { settings } from "../../../SettingsContext";
+import { appSettings } from "../../../SettingsContext";
 import Dropdown from "../../molecules/Dropdown/";
 import BackToTopBtn from "../../molecules/BackToTopBtn/";
 import MobileFullScreen from "../../sections/MobileFullScreen/";
@@ -94,7 +94,7 @@ class Products extends React.Component {
             const localStorageItemsTimestamp = localStorageItemsObject.timestamp;
             if(localStorageItemsTimestamp) {
                 const diffInMinutesCachedProducts = getDiffBetweenTwoDatesInMinutes(new Date(localStorageItemsTimestamp), new Date());
-                if(diffInMinutesCachedProducts !== null && diffInMinutesCachedProducts < settings.cacheTimeInMinutes) {
+                if(diffInMinutesCachedProducts !== null && diffInMinutesCachedProducts < appSettings.cacheTimeInMinutes) {
                     localStorageItems = localStorageItemsObject.data;
                 }
             }
@@ -106,7 +106,7 @@ class Products extends React.Component {
 
     getItemsFromAPI = () => {
 
-        return fetch(settings.apiUrlProducts)
+        return fetch(appSettings.apiUrlProducts)
             .then((response) => response.json());
 
     };

@@ -4,7 +4,6 @@ import { Helmet } from "react-helmet";
 import { injectIntl } from 'react-intl';
 import axios from 'axios';
 import withFetching from "./components/hoc/WithFetching";
-import Translator from "./components/tools/Translator";
 import Homepage from "./components/pagesTemplates/Homepage/";
 import Contact from "./components/pagesTemplates/Contact/";
 import Products from "./components/pagesTemplates/Products/";
@@ -22,53 +21,40 @@ class App extends React.Component {
         this.state = {
             pagesLoadedViaAPI: [],
             navbarPagesLoadedViaAPI: [],
-            mobileMenuPagesLoadedViaAPI: [],
-            currentPageName: '',
-            pagesContents: {}
+            mobileMenuPagesLoadedViaAPI: []
         }
-
-    }
-
-    getCurrentPageNameInEnglish(pages) {
-
-        let currentPageName = this.props.location.pathname.split('/')[1];
-
-        if(currentPageName === '') {
-            currentPageName = this.props.settings.defaultPageName;
-        }
-
-        pages.forEach((page) => {
-            if(this.props.intl.messages[page.post_name + '.slug']) {
-                const slug = this.props.intl.formatMessage({ id: page.post_name + '.slug' });
-                if(slug === currentPageName) {
-                    currentPageName = Translator(page.post_name + ".slug", "en");
-                }
-            }
-        })
-
-        return currentPageName;
 
     }
 
     componentDidMount() {
 
         let pagesLoadedViaAPI = [];
+        let apiUrlPages = this.props.settings.apiUrlPages;
+        let apiUrlMenus = this.props.settings.apiUrlMenus;
 
-        axios.get(this.props.settings.apiUrlPages)
+        // This is to prevent a bug caused by Wordpress WPML, where when an API request is done with
+        // the lang GET parameter with the default language as the value, it redirects to the same URL
+        // without the GET parameter, causing issues because of CORS
+        if(this.props.intl.locale !== this.props.settings.defaultLang) {
+            apiUrlPages += `?lang=${this.props.intl.locale}`;
+            apiUrlMenus += `?lang=${this.props.intl.locale}`;
+        }
+
+        axios.get(apiUrlPages)
             .then(res => { return res.data; })
             .then((pages) => {
                 pagesLoadedViaAPI = pages;
                 axios
-                    .get(this.props.settings.apiUrlMenus)
+                    .get(apiUrlMenus)
                     .then(res => { return res.data; })
                     .then((menus) => {
 
-                        const navbarData = menus.find((menu) => menu['slug'] === 'navbar');
-                        const mobileMenuData = menus.find((menu) => menu['slug'] === 'mobile-menu');
+                        const navbarData = menus.find((menu) => menu['slug'].indexOf('navbar') !== -1);
+                        const mobileMenuData = menus.find((menu) => menu['slug'].indexOf('mobile-menu') !== -1);
                         const navbarPagesLoadedViaAPI = navbarData !== undefined ? navbarData.pages : [];
                         const mobileMenuPagesLoadedViaAPI = mobileMenuData !== undefined ? mobileMenuData.pages : [];
 
-                        this.setState({ navbarPagesLoadedViaAPI, mobileMenuPagesLoadedViaAPI, pagesLoadedViaAPI, currentPageName: this.getCurrentPageNameInEnglish(pagesLoadedViaAPI) });
+                        this.setState({ navbarPagesLoadedViaAPI, mobileMenuPagesLoadedViaAPI, pagesLoadedViaAPI});
 
                     });
 
@@ -80,7 +66,7 @@ class App extends React.Component {
         let defaultRouteProps = {
             key: 'route-' + page.ID,
             exact: true,
-            path: '/' + Translator(page.post_name + ".slug", this.props.intl.locale)
+            path: `/${page.slugs[this.props.intl.locale]}`
         };
 
         let apiUrl = this.props.settings.apiUrlPages + '/' + page.ID;
@@ -111,6 +97,21 @@ class App extends React.Component {
         const navbarPages = this.state.navbarPagesLoadedViaAPI;
         const mobileMenuPages = this.state.mobileMenuPagesLoadedViaAPI;
         const pages = this.state.pagesLoadedViaAPI;
+        const currentPageName = this.props.location.pathname.split('/')[1];
+
+        let currentPageSlugs = null;
+
+        if(pages.length > 0) {
+            if(currentPageName === '') {
+                currentPageSlugs = {};
+                Object.keys(this.settings.availableLangs).map((availableLang) => {
+                    currentPageSlugs[availableLang] = "";
+                });
+            }
+            else {
+                currentPageSlugs = pages.find((page) => page.slugs[this.props.intl.locale] === currentPageName)['slugs'];
+            }
+        }
 
         return (
             <div>
@@ -118,10 +119,10 @@ class App extends React.Component {
                     <title>{this.documentTitle}</title>
                 </Helmet>
                 {(navbarPages.length > 0 && this.settings.viewportWidth > this.settings.mobileMenuBreakpoint) &&
-                    <Navbar pages={navbarPages} availableLangs={this.settings.availableLangs} currentPageName={this.state.currentPageName} />
+                    <Navbar pages={navbarPages} availableLangs={this.settings.availableLangs} currentPageSlugs={currentPageSlugs} />
                 }
                 {(mobileMenuPages.length > 0 && this.settings.viewportWidth <= this.settings.mobileMenuBreakpoint) &&
-                    <MobileMenu pages={mobileMenuPages} availableLangs={this.settings.availableLangs} currentPageName={this.state.currentPageName} />
+                    <MobileMenu pages={mobileMenuPages} availableLangs={this.settings.availableLangs} currentPageSlugs={currentPageSlugs} />
                 }
                 {pages.length > 0 &&
                     <Switch>

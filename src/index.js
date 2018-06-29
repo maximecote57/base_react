@@ -7,27 +7,38 @@ import fr from 'react-intl/locale-data/fr';
 import Strings from "./strings.json";
 import App from "./App";
 import Cookies from 'universal-cookie';
-import { settings } from "./SettingsContext";
+import { appSettings } from "./SettingsContext";
+import axios from 'axios';
 
-addLocaleData(en);
-addLocaleData(fr);
+axios.get(appSettings.apiUrlSettings)
+    .then(res => { return res.data; })
+    .then((wordpressSettings) => {
 
-const cookies = new Cookies();
-const currentURLPathname = window.location.pathname;
-const firstPathSegment = currentURLPathname !== "/" ? currentURLPathname.split('/')[1] : "";
-let currentLang = settings.defaultLang;
+        const settings = {...appSettings, ...wordpressSettings};
 
-if(settings.availableLangs.indexOf(firstPathSegment) !== -1 ) {
-    currentLang = firstPathSegment;
-}
-else if(cookies.get('lang')) {
-    currentLang = cookies.get('lang');
-}
+        addLocaleData(en);
+        addLocaleData(fr);
 
-ReactDOM.render(
-    <IntlProvider locale={currentLang} messages={Strings[currentLang]}>
-        <BrowserRouter basename={"/" + currentLang}>
-            <App settings={settings} />
-        </BrowserRouter>
-    </IntlProvider>
-    , document.getElementById('app'));
+        const cookies = new Cookies();
+        const currentURLPathname = window.location.pathname;
+        const firstPathSegment = currentURLPathname !== "/" ? currentURLPathname.split('/')[1] : "";
+        let currentLang = null;
+
+        if(settings.availableLangs[firstPathSegment] !== undefined ) {
+            currentLang = firstPathSegment;
+        }
+        else if(cookies.get('lang')) {
+            currentLang = cookies.get('lang');
+        }
+        else {
+            currentLang = settings.defaultLang;
+        }
+
+        ReactDOM.render(
+            <IntlProvider locale={currentLang} messages={Strings[currentLang]}>
+                <BrowserRouter basename={"/" + currentLang}>
+                    <App settings={settings} />
+                </BrowserRouter>
+            </IntlProvider>
+            , document.getElementById('app'));
+    });

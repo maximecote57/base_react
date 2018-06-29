@@ -104,7 +104,7 @@ class MobileMenu extends React.Component {
                     <div className="mobile-menu__header-section">
                     </div>
                     <div className="mobile-menu__header-section">
-                        <LangSwitcher availableLangs={this.props.availableLangs} currentPageName={this.props.currentPageName}/>
+                        <LangSwitcher availableLangs={this.props.availableLangs} currentPage={this.props.currentPage}/>
                         <button className={"mobile-menu__hamburger mobile-menu__hamburger--squeeze " + (this.state.isOpened ? 'is-active' : '')} type="button" onClick={this.handleClickHamburger}>
                           <span className="mobile-menu__hamburger-container">
                             <span className="mobile-menu__hamburger-inner"></span>

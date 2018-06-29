@@ -1,14 +1,13 @@
 import React from "react";
 import { NavLink, withRouter } from "react-router-dom";
-import { injectIntl, FormattedMessage } from 'react-intl';
+import { injectIntl } from 'react-intl';
 import LangSwitcher from "../../molecules/LangSwitcher/";
-import Translator from "../../tools/Translator";
 
 class Navbar extends React.Component {
 
     render() {
 
-        const { pages, currentPageName, availableLangs, intl } = this.props;
+        const { pages, availableLangs, intl, currentPageSlugs } = this.props;
 
         return (
             <div className="navbar component">
@@ -19,21 +18,15 @@ class Navbar extends React.Component {
                     <div className="navbar__links-container">
                         {
                             pages.map((page) => {
-
-                                const slug = Translator(page.slug + ".slug", intl.locale);
-
                                 return (
                                     <div className="navbar__link-wrapper" key={"page-" + page.ID}>
                                         <NavLink
                                             exact
                                             className="navbar__link"
                                             activeClassName="is-active"
-                                            to={"/" + slug}
+                                            to={`/${page.slugs[intl.locale]}`}
                                         >
-                                            <FormattedMessage
-                                                id={page.slug + ".title"}
-                                                default={page.title}
-                                            />
+                                            {page.title}
                                         </NavLink>
                                     </div>
                                 )
@@ -42,7 +35,7 @@ class Navbar extends React.Component {
                         <div className="navbar__link-wrapper">
                             <LangSwitcher
                                 availableLangs={availableLangs}
-                                currentPageName={currentPageName}
+                                currentPageSlugs={currentPageSlugs}
                             />
                         </div>
                     </div>
